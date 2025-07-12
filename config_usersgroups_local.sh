@@ -1,4 +1,4 @@
-echo -e "\e[34m[*] Cuentas de /etc/passwd utilizan contraseñas ocultas"
+echo -e "\e[1;34m[*] Cuentas de /etc/passwd utilizan contraseñas ocultas\e[0m"
 output=$(awk -F: '($2 != "x" ) { print "User: \"" $1 "\" is not set to shadowed passwords "}' /etc/passwd)
 exit_code=$?
 if [[ $exit_code -eq 0 ]]; then
@@ -9,7 +9,7 @@ fi
 
 echo -e "\n"
 
-echo -e "\e[34m[*] Campos de /etc/shadow password no estén vacíos"
+echo -e "\e[1;34m[*] Campos de /etc/shadow password no estén vacíos\e[0m"
 output=$(awk -F: '($2 == "" ) { print $1 " does not have a password "}' /etc/shadow)
 exit_code=$?
 if [[ $exit_code -eq 0 ]]; then
@@ -20,7 +20,7 @@ fi
 
 echo -e "\n"
 
-echo -e "\e[34m[*] Los grupos de /etc/passwd existen en /etc/group"
+echo -e "\e[1;34m[*] Los grupos de /etc/passwd existen en /etc/group\e[0m"
 # Obtener GIDs únicos desde /etc/passwd
 mapfile -t a_passwd_group_gid < <(awk -F: '{print $4}' /etc/passwd | sort -u)
 
@@ -54,7 +54,7 @@ unset a_passwd_group_diff
 
 echo -e "\n"
 
-echo -e "\e[34m[*] Grupo shadow vacio"
+echo -e "\e[1;34m[*] Grupo shadow vacio\e[0m"
 output1=$(awk -F: '($1=="shadow") {print $NF}' /etc/group)
 exit_code1=$?
 output2=$(awk -F: '($4 == '"$(getent group shadow | awk -F: '{print $3}' | xargs)"') {print " - user: \"" $1 "\" primary group is the shadow group"}' /etc/passwd)
@@ -67,7 +67,7 @@ fi
 
 echo -e "\n"
 
-echo -e "\e[34m[*] UIDs duplicados no existente"
+echo -e "\e[1;34m[*] UIDs duplicados no existente\e[0m"
 {
     # Inicializar una variable para rastrear duplicados
     has_duplicates=0
@@ -95,7 +95,7 @@ echo -e "\e[34m[*] UIDs duplicados no existente"
 
 echo -e "\n"
 
-echo -e "\e[34m[*] GIDs duplicados no existente"
+echo -e "\e[1;34m[*] GIDs duplicados no existente\e[0m"
 {
     # Inicializar una variable para rastrear duplicados
     has_duplicates=0
@@ -123,7 +123,7 @@ echo -e "\e[34m[*] GIDs duplicados no existente"
 
 echo -e "\n"
 
-echo -e "\e[34m[*] Usuarios duplicados no existente"
+echo -e "\e[1;34m[*] Usuarios duplicados no existente\e[0m"
 {
     # Inicializar una variable para rastrear duplicados
     has_duplicates=0
@@ -142,16 +142,16 @@ echo -e "\e[34m[*] Usuarios duplicados no existente"
     # Verificar si hubo duplicados
     if [ "$has_duplicates" -eq 0 ]; then
         # Si no hay duplicados, mostrar mensaje en verde
-        echo -e "\e[32m[+] No duplicate names found in /etc/group\e[0m"
+        echo -e "\e[32m[+] No duplicate names found in /etc/passwd\e[0m"
     else
         # Si hubo duplicados, mostrar mensaje adicional en rojo
-        echo -e "\e[31m[-] Some duplicate names were found in /etc/group\e[0m"
+        echo -e "\e[31m[-] Some duplicate names were found in /etc/passwd\e[0m"
     fi
 }
 
 echo -e "\n"
 
-echo -e "\e[34m[*] Grupos duplicado no existente"
+echo -e "\e[1;34m[*] Grupos duplicado no existente\e[0m"
 {
     # Inicializar una variable para rastrear duplicados
     has_duplicates=0

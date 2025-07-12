@@ -3,7 +3,7 @@ GREEN="\033[0;32m"
 RED="\033[0;31m"
 RESET="\033[0m"
 
-echo -e "\e[34m[*] Permisos de /etc/ssh/sshd_config configurados adecuadamente\e[0m"
+echo -e "\e[1;34m[*] Permisos de /etc/ssh/sshd_config configurados adecuadamente\e[0m"
 # Definición de variables
 a_output=()
 a_output2=()
@@ -54,7 +54,7 @@ fi
 
 echo -e "\n"
 
-echo -e "\e[34m[*] Permisos de los archivos de claves de host privadas SSH configuradas"
+echo -e "\e[1;34m[*] Permisos de los archivos de claves de host privadas SSH configuradas\e[0m"
 # Declaración de variables
 a_output=()
 a_output2=()
@@ -111,7 +111,7 @@ fi
 
 echo -e "\n"
 
-echo -e "\e[34m[*] Permisos de los archivos de claves de host publicas SSH configuradas\e[0m"
+echo -e "\e[1;34m[*] Permisos de los archivos de claves de host publicas SSH configuradas\e[0m"
 # Declaración de variables
 a_output=()
 a_output2=()
@@ -172,19 +172,22 @@ fi
 
 echo -e "\n"
 
-echo -e "\e[34m[*] Permisos de acceso SSH\e[0m"
+echo -e "\e[1;34m[*] Permisos de acceso SSH\e[0m"
 output=$(sshd -T | grep -Pi -- '^\h*(allow|deny)(users|groups)\h+\H+')
 exit_code=$?
 
 if [ $exit_code -ne 0 ]; then
         echo -e "\e[38;5;210m[!] Sin configuracion de acceso\e[0m"
+        echo -e "\e[33m[!] Para corregir:\nEn /etc/ssh/sshd_config"
+        echo -e "Agregar:\nAllowUsers <usuario/s>\nAllowGroups <grupo/s>"
+        echo -e "DenyUsers <usuario/s>\nDenyGroups <grupo/s>\e[0m"
 else
         echo -e "\e[32m[+] Configuracion de acceso\n$output\e[0m"
 fi
 
 echo -e "\n"
 
-echo -e "\e[34m[*] Cifrados SSH configurados\e[0m"
+echo -e "\e[1;34m[*] Cifrados SSH configurados\e[0m"
 output=$(sshd -T 2>&1 | grep -Pi -- '^ciphers\h+\"?([^#\n\r]+,)?((3des|blowfish|cast128|aes(128|192|256))-cbc|arcfour(128|256)?|rijndael-cbc@lysator\.liu\.se|chacha20-poly1305@openssh\.com)\b')
 exit_code=$?
 if [ $exit_code -ne 0 ]; then
@@ -195,78 +198,73 @@ fi
 
 echo -e "\n"
 
-echo -e "\e[34m[*] Asegúrese de que sshd ClientAliveInterval y ClientAliveCountMax están configurados\e[0m"
-output=$(sshd -T 2>&1 | grep -Pi -- 'clientaliveinterval|clientalivecountmax')
-exit_code=$?
-if [ $exit_code -ne 0 ]; then
-        echo -e "\e[38;5;210m[!] ClientAliveInterval y ClientAliveCpuntMax no configurados\e[0m"
-else
-        echo -e "\e[32m[+] ClientAliveInterval y ClientAliveCountMax configurados:\n$output\e[0m"
-fi
+echo -e "\e[1;34m[*] Configuraciones de /etc/sshd_config\e[0m"
+configs=('disableforwarding' 'gssapiauthentication' 'hostbasedauthentication' 'ignorerhosts' 'loglevel' 'logingracetime' 'maxauthtries' 'permitemptypasswords' 'permituserenvironment' 'maxstartups' 'PermitRootLogin' 'clientaliveinterval' 'clientalivecountmax')
+for config in "${configs[@]}"; do
+        output=$(sshd -T | grep -i ^$config)
 
-echo -e "\n"
+        if [[ -n "$output" ]]; then
+                value=$(echo "$output" | awk '{print $2}')
 
-echo -e "\e[34m[*] sshd DisableForwarding está activado"
-output=$(sshd -T | grep -i disableforwarding)
-exit_code=$?
-if [[ $exit_code -ne 0 ]]; then
-        echo -e "\e[38;5;210m[!] DisableForwarding no habilitado:\n-> $output\e[0m"
-else
-        if [[ $output == *"disableforwarding no"* ]]; then
-                echo -e "\e[38;5;210m[!] DisableForwarding no está habilitado:\n-> $output\e[0m"
+                if [[ "$value" == "yes" ]]; then
+                        echo -e "\e[32m[+] $output"
+                elif [[ "$value" == "no" ]]; then
+                        if [[ "$config" == "gssapiauthentication" || "$config" == "hostbasedauthentication" || "$config" == "permitemptypasswords" || "$config" == "permituserenvironment" ]]; then
+                                echo -e "\e[32m[+] $output"
+                        else
+                                echo -e "\e[38;5;210m[-] $output"
+                        fi
+                elif [[ "$config" == "loglevel" ]]; then
+                        if [[ "$value" == "INFO" || "$value" == "VERBOSE" ]]; then
+                                echo -e "\e[32m[+] $output"
+                        else
+                                echo -e "\e[37;5;210mm[-] $output"
+                        fi
+                elif [[ "$config" == "logingracetime" ]]; then
+                        if [[ "$value" != "60" ]]; then
+                                echo -e "\e[38;5;210m[-] $output -> Valor recomendado: 60"
+                        else
+                                echo -e "\e[32m[+] $output"
+                        fi
+                elif [[ "$config" == "maxauthtries" ]]; then
+                        if [[ "$value" != "4" ]]; then
+                                echo -e "\e[38;5;210m[-] $output -> Valor recomendado: 4"
+                        else
+                                echo -e "\e[32m[+] $output"
+                        fi
+                elif [[ "$config" == "maxstartups" ]]; then
+                        if [[ "$value" != "10:30:60" ]]; then
+                                echo -e "\e[38;5;210m[-] $output -> Valor recomendado: 10:30:60"
+                        else
+                                echo -e "\e[32m[+] $output"
+                        fi
+                elif [[ "$config" == "PermitRootLogin" ]]; then
+                        if [[ "$value" == "no" || "$value" == "without-password" ]]; then
+                                echo -e "\e[32m[+] $output"
+                                if [[ "$value" == "without-password" ]]; then
+                                        echo -e "\e[33m    [!] without-password: Permite el acceso root, pero solo si usa una clave SSH"
+                                fi
+                        else
+                                echo -e "\e[38;5;210mm[-] $output"
+                        fi
+                elif [[ "$config" == "clientalivecountmax" || "$config" == "clientaliveinterval" ]]; then
+                        if [[ "$value" =~ ^[0-9]+$ ]]; then
+                                echo -e "\e[32m[+] $output"
+                        else
+                                echo -e "\e[38;5;210m[-] $output -> El valor tiene que ser un numerico"
+                        fi
+                else
+                        echo -e "\e[38;5;210m[!] Valor desconocido"
+                fi
         else
-                echo -e "\e[32m[+] DisableForwarding habilitado:\n-> $output\e[0m"
+                echo -e "\e[38;5;210m[-] No se encuentra esa configuracion"
         fi
-fi
+done
+echo -e "\e[33m[!] Para añadir o modificar configuraciones: /etc/ssh/sshd_config"
 
 echo -e "\n"
 
-echo -e "\e[34m[*] sshd GSSAPIAuthentication esta deshabilitado"
-output=$(sshd -T | grep -i gssapiauthentication)
-exit_code=$?
-if [[ $exit_code -ne 0 ]]; then
-        echo -e "\e[32[+] GSSAPIAuthentication no habilitado:\n-> $output\e[0m"
-else
-        if [[ $output == *"gssapiauthentication no"* ]]; then
-                echo -e "\e[32m[+] GSSAPIAuthentication no está habilitado:\n-> $output\e[0m"
-        else
-                echo -e "\e[38;5;210m[!] GSSAPIAuthentication habilitado:\n-> $output\e[0m"
-        fi
-fi
-
-echo -e "\n"
-
-echo -e "\e[34m[*] sshd HostBasedAuthentication esta deshabilitado"
-output=$(sshd -T | grep -i hostbasedauthentication)
-exit_code=$?
-if [[ $exit_code -ne 0 ]]; then
-        echo -e "\e[32[+] HostBasedAuthentication no habilitado:\n-> $output\e[0m"
-else
-        if [[ $output == *"hostbasedauthentication no"* ]]; then
-                echo -e "\e[32m[+] HostBasedAuthentication no está habilitado:\n-> $output\e[0m"
-        else
-                echo -e "\e[38;5;210m[!] HostBasedAuthentication habilitado:\n-> $output\e[0m"
-        fi
-fi
-
-echo -e "\n"
-
-echo -e "\e[34m[*] sshd IgnoreRhosts esta activado"
-output=$(sshd -T | grep -i ignorerhosts)
-exit_code=$?
-if [[ $exit_code -ne 0 ]]; then
-        echo -e "\e[38;5;210m[!] IgnoreRhosts no habilitado:\n-> $output\e[0m"
-else
-        if [[ $output == *"ignorerhosts no"* ]]; then
-                echo -e "\e[38;5;210m[!] DisableForwarding no está habilitado:\n-> $output\e[0m"
-        else
-                echo -e "\e[32m[+] IgnoreRhosts habilitado:\n-> $output\e[0m"
-        fi
-fi
-
-echo -e "\n"
-
-echo -e "\e[34m[*] KexAlgorithms correctamente configurado\e[0m"
+echo -e "\e[1;34m[*] KexAlgorithms correctamente configurado\e[0m"
 #output=$(sshd -T | grep -Pi -- 'kexalgorithms\h+([^#\n\r]+,)?(diffie-hellman-group1-sha1|diffie-hellman-group14-sha1|diffie-hellman-group-exchange-sha1)\b')
 output2=$(sshd -T | grep -i 'kexalgorithms')
 output=$(sshd -T | grep -Pi -- 'kexalgorithms\h+([^#\n\r]+,)?(diffie-hellman-group1-sha1|diffie-hellman-group14-sha1|diffie-hellman-group-exchange-sha1)\b')
@@ -283,37 +281,7 @@ fi
 
 echo -e "\n"
 
-echo -e "\e[34m[*] sshd LoginGraceTime configurado\e[0m"
-output=$(sshd -T | grep -i logingracetime)
-exit_code=$?
-if [[ $exit_code -ne 0 ]]; then
-        echo -e "\e[38;5;210m[!] LoginGraceTime no habilitado\e[0m"
-else
-        if [[ $output != "logingracetime 60" ]]; then
-                echo -e "\e[33m[!] $output -> El valor recomendado es 60"
-        else
-                echo -e "\e[32m[+] LoginGraceTime correctamente configurado\n-> $output\e[0m"
-        fi
-fi
-
-echo -e "\n"
-
-echo -e "\e[34m[*] sshd LogLevel configurado: INFO o VERBOSE\e[0m"
-output=$(sshd -T | grep -i loglevel)
-exit_code=$?
-if [[ $exit_code -ne 0 ]]; then
-        echo -e "\e[38;5;210m[!] LogLevel no habilitado\e[0m"
-else
-        if [[ $output == "loglevel VERBOSE" || $output == "loglevel INFO" ]]; then
-                echo -e "\e[32m[+] $output"
-        else
-                echo -e "\e[38;5;210m[!] $output -> El valor de LogLevel deb eser INFO o VERBOSE\e[0m"
-        fi
-fi
-
-echo -e "\n"
-
-echo -e "\e[34m[*] sshd MACs estan configurados"
+echo -e "\e[1;34m[*] sshd MACs estan configurados\e[0m"
 output2=$(sshd -T | grep -i 'macs')
 output=$(sshd -T | grep -Pi -- 'macs\h+([^#\n\r]+,)?(hmac-md5|hmac-md5-96|hmac-ripemd160|hmac-sha1-96|umac-64@openssh\.com|hmac-md5-etm@openssh\.com|hmac-md5-96-etm@openssh\.com|hmac-ripemd160-etm@openssh\.com|hmac-sha1-96-etm@openssh\.com|umac-64-etm@openssh\.com|umac-128-etm@openssh\.com)\b')
 exit_code=$?
@@ -321,94 +289,16 @@ if [[ $exit_code -ne 0 ]]; then
         echo -e "\e[32m[+] Macs sin cifrados debiles:\n-> $output2\e[0m"
 else
         if [[ $output == *"macs no"* ]]; then
-                echo -e "\e[38;5;210m[!] Macs no está habilitado:\n-> $output\e[0m"
+                echo -e "\e[38;5;210m[-] Macs no está habilitado:\n-> $output\e[0m"
         else
-                echo -e "\e[33m[!] Macs con cifrado debil:\n-> $output\e[0m"
-                echo -e "\e[38;5;210m[!] Cifrados seguros:\n* HMAC-SHA1\n* HMAC-SHA2-256\n* HMAC-SHA2-384\n* HMAC-SHA2-512"
+                echo -e "\e[38;5;210m[-] Macs con cifrado debil:\n-> $output\e[0m"
+                echo -e "\e[33m[!] Cifrados seguros:\n* HMAC-SHA1\n* HMAC-SHA2-256\n* HMAC-SHA2-384\n* HMAC-SHA2-512"
         fi
 fi
 
 echo -e "\n"
 
-echo -e "\e[34m[*] sshd MaxAuthTries configurado\e[0m"
-output=$(sshd -T | grep -i maxauthtries)
-exit_code=$?
-if [[ $exit_code -ne 0 ]]; then
-        echo -e "\e[38;5;210m[!] MaxAuthTries no habilitado\e[0m"
-else
-        if [[ $output != "maxauthtries 4" ]]; then
-                echo -e "\e[33m[!] $output -> El valor recomendado es 4"
-        else
-                echo -e "\e[32m[+] MaxAuthTries correctamente configurado\n-> $output\e[0m"
-        fi
-fi
-
-echo -e "\n"
-
-echo -e "\e[34m[*] sshd MaxStartups configurado\e[0m"
-output=$(sshd -T | awk '$1 ~ /^\s*maxstartups/{split($2, a, ":");{if(a[1] > 10 || a[2] > 30 || a[3] > 60) print $0}}')
-exit_code=$?
-if [[ $exit_code -ne 0 ]]; then
-        echo -e "\e[38;5;210m[!] MaxStartups no habilitado\e[0m"
-else
-        if [[ $output != "maxstartups 10:30:60" ]]; then
-                echo -e "\e[33m[!] $output -> El valor recomendado es 10:30:60"
-        else
-                echo -e "\e[32m[+] MaxStartups correctamente configurado\n-> $output\e[0m"
-        fi
-fi
-
-echo -e "\n"
-
-echo -e "\e[34m[*] sshd PermitEmptyPasswords desactivo"
-output=$(sshd -T | grep -i permitemptypasswords)
-exit_code=$?
-if [[ $exit_code -ne 0 ]]; then
-        echo -e "\e[38;5;210m[!] PermitEmptyPasswords no habilitado:\n-> $output\e[0m"
-else
-        if [[ $output == *"permitemptypasswords no"* ]]; then
-                echo -e "\e[32m[+] PermitEmptyPasswords desactivado:\n-> $output\e[0m"
-    else
-                echo -e "\e[31m[-] PermitEmptyPasswords activado:\n-> $output\e[0m"
-        fi
-fi
-
-echo -e "\n"
-
-echo -e "\e[34m[*] sshd PermitRootLogin desactivo"
-output=$(sshd -T | grep -i permitrootlogin)
-exit_code=$?
-if [[ $exit_code -ne 0 ]]; then
-        echo -e "\e[38;5;210m[!] PermitRootLogin no habilitado:\n-> $output\e[0m"
-else
-        if [[ $output == *"permitrootlogin no"* || $output == *"permitrootlogin without-password"* ]]; then
-                echo -e "\e[32m[+] PermitRootLogin desactivado:\n-> $output\e[0m"
-        if [[ $output == "permitrootlogin without-password" ]]; then
-            echo -e "\e[38;5;210m[!] Without-Password -> quiere decir que puede utilizar\nmétodos de autenticación que no sean basados en\ncontraseñas, como las claves SSH."
-        fi
-    else
-                echo -e "\e[31m[-] PermitRootLogin activado:\n-> $output\e[0m"
-        fi
-fi
-
-echo -e "\n"
-
-echo -e "\e[34m[*] sshd PermitUserEnvironment desactivo"
-output=$(sshd -T | grep -i permituserenvironment)
-exit_code=$?
-if [[ $exit_code -ne 0 ]]; then
-        echo -e "\e[38;5;210m[!] PermitUserEnvironment no habilitado:\n-> $output\e[0m"
-else
-        if [[ $output == *"permituserenvironment no"* ]]; then
-                echo -e "\e[32m[+] PermitUserEnvironment desactivado:\n-> $output\e[0m"
-    else
-                echo -e "\e[31m[-] PermitUserEnvironment activado:\n-> $output\e[0m"
-        fi
-fi
-
-echo -e "\n"
-
-echo -e "\e[34m sshd UsePAM activado"
+echo -e "\e[1;34m sshd UsePAM activado\e[0m"
 output=$(sshd -T | grep -i usepam)
 exit_code=$?
 if [[ $exit_code -ne 0 ]]; then

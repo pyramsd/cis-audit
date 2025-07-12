@@ -1,13 +1,9 @@
-#!/usr/bin/env bash
+#!/usr/bin/bash
 
 # Colors
 GREEN="\033[0;32m"
 RED="\033[0;31m"
 RESET="\033[0m"
-
-# Update server
-#apt update
-#apt dist-upgrade -y
 
 # Services - Configure Server and Clients Services
 source config_server_clients_services.sh
@@ -19,7 +15,7 @@ source config_cron_permissions.sh
 
 echo -e "\n"
 
-# Host Based Firewall - Configure UFW
+# Host Based Firewall - Configure firewall
 source config_firewall.sh
 
 echo -e "\n"
@@ -29,10 +25,20 @@ source config_ssh_server.sh
 
 echo -e "\n"
 
-# Local User and Group Settings
+# Access Control - Configure privilige escalation
+source config_privilage_escalation.sh
+
+echo -e "\n"
+
+# Configure root and system accounts and environmen
+source config_root_system_envs_accounts.sh
+
+echo -e "\n"
+
+# System Maintenance - Local User and Group Settings
 source config_usersgroups_local.sh
 
 echo -e "\n"
 
-# Access Control - Configure privilige escalation
-source config_privilage_escalation.sh
+# System Maintenance - System file permission
+source config_system_file_permissions.sh

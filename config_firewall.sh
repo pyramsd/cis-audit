@@ -1,4 +1,23 @@
-echo -e "\n\e[34m[*] Asegúrese de que se utiliza una única utilidad de configuración de cortafuegos\e[0m"
+# Colors
+GREEN="\033[0;32m"
+RED="\033[0;31m"
+RESET="\033[0m"
+
+echo -e "\e[1;34m[*] Configuracion de firewall\e[0m"
+firewalls=('ufw' 'nftables' 'iptables' 'iptables-persistent')
+echo -e "Requerimientos:"
+for frw in "${firewalls[@]}"; do
+        if dpkg-query -s $frw &>/dev/null; then
+                echo -e "\e[32m[+] $frw instalado\e[0m"
+        else
+                if [[ $frw == "iptables-persistent" ]]; then
+                        echo -e "\e[32m[+] $frw no instalado\e[0m\n"
+                else
+                        echo -e "\e[31m[-] $frw no instalado\e[0m\n"
+                fi
+        fi
+done
+
 # Arrays para almacenar resultados
 active_firewall=()
 firewalls=("ufw" "nftables" "iptables")
@@ -19,36 +38,21 @@ for firewall in "${firewalls[@]}"; do
 done
 
 # Mostrar resultados de la auditoría
-echo -e "${BLUE}Audit Results:${RESET}"
 if [ ${#active_firewall[@]} -eq 1 ]; then
-    echo -e "${GREEN} ** PASS **${RESET}"
-    echo -e "${GREEN} - A single firewall is in use. Follow the recommendation in '${active_firewall[0]}' subsection ONLY."
+    echo -e "${GREEN}\n** PASS **${RESET}"
+    echo -e "${GREEN}[+] Un firewall en uso: '${active_firewall[0]}'"
 elif [ ${#active_firewall[@]} -eq 0 ]; then
-    echo -e "${RED} ** FAIL **${RESET}"
-    echo -e "${RED} - No firewall in use or unable to determine firewall status."
+    echo -e "${RED}\n** FAIL **${RESET}"
+    echo -e "${RED}[-] Ningunfirewall en uso o habilitado."
 else
-    echo -e "${RED} ** FAIL **${RESET}"
-    echo -e "${RED} - Multiple firewalls are in use: ${active_firewall[*]}"
+    echo -e "${RED}** FAIL **${RESET}"
+    echo -e "${RED}[-] Multiples firewalls en uso: ${active_firewall[*]}\n"
+    echo -e "\e[33m Tiene que estar funcionando UN solo firewall."
 fi
 
 echo -e "\n"
 
-echo -e "\e[34m[*] Asegurarse que iptables-persistent no este instalado con ufw\e[0m"
-if dpkg-query -s ufw &>/dev/null; then
-        echo -e "\e[32m[+] ufw is installed\e[0m"
-else
-        echo -e "\e[31m[-] ufw is not installed\e[0m"
-fi
-
-if dpkg-query -s iptables-persistent &>/dev/null; then
-        echo -e "\e[31m[-] iptables-persistent is installed.\e[0m"
-else
-        echo -e "\e[32m[+] iptables-persistent is not installed\e[0m"
-fi
-
-echo -e "\n"
-
-echo -e "\e[34m[*] Asegúrese de que el servicio ufw está activado"
+echo -e "\e[1;34m[*] Asegúrese de que el servicio del firewall está activado\e[0m"
 ufw_enabled=$(systemctl is-enabled ufw.service)
 ufw_activated=$(systemctl is-active ufw.service)
 ufw_status=$(ufw status verbose)
@@ -66,16 +70,21 @@ fi
 
 echo -e "\n"
 
-echo -e "\e[34m[*] Asegúrese de que ufw loopback traffic está configurado"
+echo -e "\e[1;34m[*] Asegúrese de que ufw loopback traffic está configurado\e[0m"
 if [[ $ufw_status =~ Anywhere.*DENY.IN.*127\.0\.0\.0/8 || $ufw_status =~ Anywhere.\(v6\).*DENY.IN.*::1 ]]; then
     echo -e "\e[32m[+] $ufw_status\e[0m"
 else
     echo -e "\e[38;5;210m[!] $ufw_status\n[!] Loopback traffic no esta configurado.\e[0m"
+    echo -e "\e[33m[!] Para Corregir:"
+    echo -e "# ufw allow in on lo" 
+    echo -e "# ufw allow out on lo"
+    echo -e "# ufw deny in from 127.0.0.0/8"
+    echo -e "# ufw deny in from ::1"
 fi
 
 echo -e "\n"
 
-echo -e "\e[34m[*] Asegúrese de que existen reglas de cortafuegos ufw para todos los puertos abiertos\e[0m"
+echo -e "\e[1;34m[*] Reglas de cortafuegos para todos los puertos abiertos\e[0m"
 # Obtener puertos en las reglas de UFW
 a_ufwout=()
 while read -r l_ufwport; do
@@ -96,7 +105,9 @@ if [[ -n "${a_diff[*]}" ]]; then
   echo -e "\e[31m[-] Audit Result:\n ** FAIL **"
   echo "- The following port(s) don't have a rule in UFW:"
   printf '  - %s\n' "${a_diff[@]}"
-  echo "- End List\e[0m"
+  echo -e "\e[33m[!] Para corregir:"
+  echo -e "# ufw allow <programa> o # ufw allow <puerto>/<protocolo>"
+  echo -e "Ejemplo:\n# ufw allow postgresql\n# ufw allow 5432/tcp"
 else
   echo -e "\e[32m[+] Audit Passed"
   echo -e "\e[32m[+] All open ports have a rule in UFW\e[0m"
@@ -104,10 +115,15 @@ fi
 
 echo -e "\n"
 
-echo -e "\e[34m[*] Asegúrese de que la política de cortafuegos de denegación predeterminada ufw\e[0m"
-deny_permissions=$(ufw status verbose | grep Default:)
-if [[ $deny_permissions =~ Default:.deny.\(incoming\),.deny.\(outgoing\),.disabled.\(routed\) ]]; then
-        echo -e "\e[32m[+]Tiene reglas denegadas por defecto\n$deny_permissions\e[0m"
+echo -e "\e[1;34m[*] Asegúrese de que la política de cortafuegos de denegación predeterminada ufw\e[0m"
+deny_permissions=$(ufw status verbose | grep "Default:" | sed 's/[[:space:]]*$//')
+if [[ $deny_permissions == "Default: deny (incoming), deny (outgoing), deny (routed)" ]]; then
+        echo -e "\e[32m[+]Tiene reglas denegadas por defecto\n$deny_permissions\e[0m\n"
 else
-        echo -e "\e[31m[-] No tiene reglas denegadas por defecto\n$deny_permissions\e[0m"
+        echo -e "\e[38;5;210m[-] No tiene reglas denegadas por defecto\n$deny_permissions\e[0m"
+        echo -e "\e[33m[!] Para corregir:"
+        echo -e "# ufw default deny incoming"
+        echo -e "# ufw default deny outgoing"
+        echo -e "# ufw default deny routed\n"
 fi
+echo -e "\e[33m[!] En caso de tener varios firewalls instalados o habilitados, escoja solo UNO\e[0m"

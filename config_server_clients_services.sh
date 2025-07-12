@@ -4,22 +4,23 @@ RED="\033[0;31m"
 RESET="\033[0m"
 
 # Software que no deben estar instalados a primera instancia
-echo -e "\e[34m[*] Estos softwares no deben de estar instalados a no ser que sean necesarios:"
+echo -e "\e[1;34m[*] Estos softwares no deben de estar instalados a no ser que sean necesarios:\e[0m"
 # Lista de paquetes a verificar
 packages=("autofs" "avahi-daemon" "bind9" "dnsmasq" "vsftpd" "ftp" "slapd" "dovecot-imapd" "nfs-kernel-server" "ypserv" "cups" "rpcbind" "rsync" "samba" "snmpd" "tftpd-hpa" "squid" "apache2" "nginx" "xinetd" "xserver-common" "isc-dhcp-server" "nis" "rsh-client" "talk" "telnet" "inetutils-telnet" "ldap-utils" "tnftp")
 
 # Iterar sobre la lista de paquetes
 for pkg in "${packages[@]}"; do
     if dpkg-query -s "$pkg" &>/dev/null; then
-        echo -e "\e[31m[-] $pkg is installed"
+        echo -e "\e[38;5;210m[-] $pkg is installed"
     else
         echo -e "\e[32m[+] $pkg is not installed"
     fi
 done
+echo -e "\n\e[33m[!] Si el servidor requiere de estos software ignore la advertencia."
 
 echo -e "\n"
 
-echo -e "\e[34m[*] Asegúrese de que el agente de transferencia de correo está configurado en modo sólo local\e[0m"
+echo -e "\e[1;34m[*] Asegúrese de que el agente de transferencia de correo está configurado en modo sólo local\e[0m"
 # Arrays para almacenar los resultados
 a_output=()
 a_output2=()
