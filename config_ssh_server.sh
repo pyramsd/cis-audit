@@ -1,9 +1,4 @@
-# Colors
-GREEN="\033[0;32m"
-RED="\033[0;31m"
-RESET="\033[0m"
-
-echo -e "\e[1;34m[*] Permisos de /etc/ssh/sshd_config configurados adecuadamente\e[0m"
+echo -e "\e[1;34m[*] Permisos de /etc/ssh/sshd_config configurados adecuadamente${RESET}"
 # Definición de variables
 a_output=()
 a_output2=()
@@ -54,7 +49,7 @@ fi
 
 echo -e "\n"
 
-echo -e "\e[1;34m[*] Permisos de los archivos de claves de host privadas SSH configuradas\e[0m"
+echo -e "\e[1;34m[*] Permisos de los archivos de claves de host privadas SSH configuradas${RESET}"
 # Declaración de variables
 a_output=()
 a_output2=()
@@ -111,7 +106,7 @@ fi
 
 echo -e "\n"
 
-echo -e "\e[1;34m[*] Permisos de los archivos de claves de host publicas SSH configuradas\e[0m"
+echo -e "\e[1;34m[*] Permisos de los archivos de claves de host publicas SSH configuradas${RESET}"
 # Declaración de variables
 a_output=()
 a_output2=()
@@ -172,33 +167,33 @@ fi
 
 echo -e "\n"
 
-echo -e "\e[1;34m[*] Permisos de acceso SSH\e[0m"
+echo -e "\e[1;34m[*] Permisos de acceso SSH${RESET}"
 output=$(sshd -T | grep -Pi -- '^\h*(allow|deny)(users|groups)\h+\H+')
 exit_code=$?
 
 if [ $exit_code -ne 0 ]; then
-        echo -e "\e[38;5;210m[!] Sin configuracion de acceso\e[0m"
+        echo -e "\e[38;5;210m[!] Sin configuracion de acceso${RESET}"
         echo -e "\e[33m[!] Para corregir:\nEn /etc/ssh/sshd_config"
         echo -e "Agregar:\nAllowUsers <usuario/s>\nAllowGroups <grupo/s>"
-        echo -e "DenyUsers <usuario/s>\nDenyGroups <grupo/s>\e[0m"
+        echo -e "DenyUsers <usuario/s>\nDenyGroups <grupo/s>${RESET}"
 else
-        echo -e "\e[32m[+] Configuracion de acceso\n$output\e[0m"
+        echo -e "${GREEN}[+] Configuracion de acceso\n$output${RESET}"
 fi
 
 echo -e "\n"
 
-echo -e "\e[1;34m[*] Cifrados SSH configurados\e[0m"
+echo -e "\e[1;34m[*] Cifrados SSH configurados${RESET}"
 output=$(sshd -T 2>&1 | grep -Pi -- '^ciphers\h+\"?([^#\n\r]+,)?((3des|blowfish|cast128|aes(128|192|256))-cbc|arcfour(128|256)?|rijndael-cbc@lysator\.liu\.se|chacha20-poly1305@openssh\.com)\b')
 exit_code=$?
 if [ $exit_code -ne 0 ]; then
-        echo -e "\e[38;5;210m[!] Cifrados no configurados\e[0m"
+        echo -e "\e[38;5;210m[!] Cifrados no configurados${RESET}"
 else
-        echo -e "\e[32m[+] Cifrados configurados:\n$output\e0m"
+        echo -e "${GREEN}[+] Cifrados configurados:\n$output\e0m"
 fi
 
 echo -e "\n"
 
-echo -e "\e[1;34m[*] Configuraciones de /etc/sshd_config\e[0m"
+echo -e "\e[1;34m[*] Configuraciones de /etc/sshd_config${RESET}"
 configs=('disableforwarding' 'gssapiauthentication' 'hostbasedauthentication' 'ignorerhosts' 'loglevel' 'logingracetime' 'maxauthtries' 'permitemptypasswords' 'permituserenvironment' 'maxstartups' 'PermitRootLogin' 'clientaliveinterval' 'clientalivecountmax')
 for config in "${configs[@]}"; do
         output=$(sshd -T | grep -i ^$config)
@@ -207,16 +202,16 @@ for config in "${configs[@]}"; do
                 value=$(echo "$output" | awk '{print $2}')
 
                 if [[ "$value" == "yes" ]]; then
-                        echo -e "\e[32m[+] $output"
+                        echo -e "${GREEN}[+] $output"
                 elif [[ "$value" == "no" ]]; then
                         if [[ "$config" == "gssapiauthentication" || "$config" == "hostbasedauthentication" || "$config" == "permitemptypasswords" || "$config" == "permituserenvironment" ]]; then
-                                echo -e "\e[32m[+] $output"
+                                echo -e "${GREEN}[+] $output"
                         else
                                 echo -e "\e[38;5;210m[-] $output"
                         fi
                 elif [[ "$config" == "loglevel" ]]; then
                         if [[ "$value" == "INFO" || "$value" == "VERBOSE" ]]; then
-                                echo -e "\e[32m[+] $output"
+                                echo -e "${GREEN}[+] $output"
                         else
                                 echo -e "\e[37;5;210mm[-] $output"
                         fi
@@ -224,23 +219,23 @@ for config in "${configs[@]}"; do
                         if [[ "$value" != "60" ]]; then
                                 echo -e "\e[38;5;210m[-] $output -> Valor recomendado: 60"
                         else
-                                echo -e "\e[32m[+] $output"
+                                echo -e "${GREEN}[+] $output"
                         fi
                 elif [[ "$config" == "maxauthtries" ]]; then
                         if [[ "$value" != "4" ]]; then
                                 echo -e "\e[38;5;210m[-] $output -> Valor recomendado: 4"
                         else
-                                echo -e "\e[32m[+] $output"
+                                echo -e "${GREEN}[+] $output"
                         fi
                 elif [[ "$config" == "maxstartups" ]]; then
                         if [[ "$value" != "10:30:60" ]]; then
                                 echo -e "\e[38;5;210m[-] $output -> Valor recomendado: 10:30:60"
                         else
-                                echo -e "\e[32m[+] $output"
+                                echo -e "${GREEN}[+] $output"
                         fi
                 elif [[ "$config" == "PermitRootLogin" ]]; then
                         if [[ "$value" == "no" || "$value" == "without-password" ]]; then
-                                echo -e "\e[32m[+] $output"
+                                echo -e "${GREEN}[+] $output"
                                 if [[ "$value" == "without-password" ]]; then
                                         echo -e "\e[33m    [!] without-password: Permite el acceso root, pero solo si usa una clave SSH"
                                 fi
@@ -249,7 +244,7 @@ for config in "${configs[@]}"; do
                         fi
                 elif [[ "$config" == "clientalivecountmax" || "$config" == "clientaliveinterval" ]]; then
                         if [[ "$value" =~ ^[0-9]+$ ]]; then
-                                echo -e "\e[32m[+] $output"
+                                echo -e "${GREEN}[+] $output"
                         else
                                 echo -e "\e[38;5;210m[-] $output -> El valor tiene que ser un numerico"
                         fi
@@ -264,49 +259,49 @@ echo -e "\e[33m[!] Para añadir o modificar configuraciones: /etc/ssh/sshd_confi
 
 echo -e "\n"
 
-echo -e "\e[1;34m[*] KexAlgorithms correctamente configurado\e[0m"
+echo -e "\e[1;34m[*] KexAlgorithms correctamente configurado${RESET}"
 #output=$(sshd -T | grep -Pi -- 'kexalgorithms\h+([^#\n\r]+,)?(diffie-hellman-group1-sha1|diffie-hellman-group14-sha1|diffie-hellman-group-exchange-sha1)\b')
 output2=$(sshd -T | grep -i 'kexalgorithms')
 output=$(sshd -T | grep -Pi -- 'kexalgorithms\h+([^#\n\r]+,)?(diffie-hellman-group1-sha1|diffie-hellman-group14-sha1|diffie-hellman-group-exchange-sha1)\b')
 exit_code=$?
 if [[ $exit_code -ne 0 ]]; then
-        echo -e "\e[32m[+] KexAlgorithms sin cifrados debiles:\n-> $output2\e[0m"
+        echo -e "${GREEN}[+] KexAlgorithms sin cifrados debiles:\n-> $output2${RESET}"
 else
         if [[ $output == *"kexalgorithms no"* ]]; then
-                echo -e "\e[38;5;210m[!] KexAlgorithms no está habilitado:\n-> $output\e[0m"
+                echo -e "\e[38;5;210m[!] KexAlgorithms no está habilitado:\n-> $output${RESET}"
         else
-                echo -e "\e[32m[+] KexAlgorithms habilitado:\n-> $output2\e[0m"
+                echo -e "${GREEN}[+] KexAlgorithms habilitado:\n-> $output2${RESET}"
         fi
 fi
 
 echo -e "\n"
 
-echo -e "\e[1;34m[*] sshd MACs estan configurados\e[0m"
+echo -e "\e[1;34m[*] sshd MACs estan configurados${RESET}"
 output2=$(sshd -T | grep -i 'macs')
 output=$(sshd -T | grep -Pi -- 'macs\h+([^#\n\r]+,)?(hmac-md5|hmac-md5-96|hmac-ripemd160|hmac-sha1-96|umac-64@openssh\.com|hmac-md5-etm@openssh\.com|hmac-md5-96-etm@openssh\.com|hmac-ripemd160-etm@openssh\.com|hmac-sha1-96-etm@openssh\.com|umac-64-etm@openssh\.com|umac-128-etm@openssh\.com)\b')
 exit_code=$?
 if [[ $exit_code -ne 0 ]]; then
-        echo -e "\e[32m[+] Macs sin cifrados debiles:\n-> $output2\e[0m"
+        echo -e "${GREEN}[+] Macs sin cifrados debiles:\n-> $output2${RESET}"
 else
         if [[ $output == *"macs no"* ]]; then
-                echo -e "\e[38;5;210m[-] Macs no está habilitado:\n-> $output\e[0m"
+                echo -e "\e[38;5;210m[-] Macs no está habilitado:\n-> $output${RESET}"
         else
-                echo -e "\e[38;5;210m[-] Macs con cifrado debil:\n-> $output\e[0m"
+                echo -e "\e[38;5;210m[-] Macs con cifrado debil:\n-> $output${RESET}"
                 echo -e "\e[33m[!] Cifrados seguros:\n* HMAC-SHA1\n* HMAC-SHA2-256\n* HMAC-SHA2-384\n* HMAC-SHA2-512"
         fi
 fi
 
 echo -e "\n"
 
-echo -e "\e[1;34m sshd UsePAM activado\e[0m"
+echo -e "\e[1;34m sshd UsePAM activado${RESET}"
 output=$(sshd -T | grep -i usepam)
 exit_code=$?
 if [[ $exit_code -ne 0 ]]; then
-        echo -e "\e[38;5;210m[!] UsePam no habilitado:\n-> $output\e[0m"
+        echo -e "\e[38;5;210m[!] UsePam no habilitado:\n-> $output${RESET}"
 else
         if [[ $output == *"usepam no"* ]]; then
-                echo -e "\e[38;5;210m[!] UsePam desactivado:\n-> $output\e[0m"
+                echo -e "\e[38;5;210m[!] UsePam desactivado:\n-> $output${RESET}"
     else
-                echo -e "\e[32m[+] UsePam activado:\n-> $output\e[0m"
+                echo -e "${GREEN}[+] UsePam activado:\n-> $output${RESET}"
         fi
 fi

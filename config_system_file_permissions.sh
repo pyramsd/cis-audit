@@ -1,4 +1,5 @@
-echo -e "\e[1;34m[*] Permisos de los archivos del sistema\e[0m"
+echo -e "\e[1;34m[*] Permisos de los archivos del sistema"
+echo -e "(permission bits in octal/user ID of owner/group name of owner)${RESET}"
 system_files=(
     "/etc/passwd:0644:0/root:0/root"
     "/etc/passwd-:0644:0/root:0/root"
@@ -22,10 +23,10 @@ for entry in "${system_files[@]}"; do
 
                 if [ "$actual_perms" == "$expected_perms" ]; then
                         echo "Archivo $file:"
-                        echo -e "\e[32m-> $actual_perms\n\e[0m"
+                        echo -e "${GREEN}-> $actual_perms\n${RESET}"
                 else
                         echo -e "\e[38;5;210m[-] ADVERTENCIA: Los permisos del archivo $file son $actual_perms"
-                        echo -e "\e[33m[!] Pero deberían ser $expected_perms"
+                        echo -e "${YELLOW}[!] Pero deberían ser $expected_perms"
                 fi
         else
                 echo -e "\e[38;5;210m[-] El archivo $file no existe"

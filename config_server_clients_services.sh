@@ -1,10 +1,5 @@
-# Colors
-GREEN="\033[0;32m"
-RED="\033[0;31m"
-RESET="\033[0m"
-
 # Software que no deben estar instalados a primera instancia
-echo -e "\e[1;34m[*] Estos softwares no deben de estar instalados a no ser que sean necesarios:\e[0m"
+echo -e "\e[1;34m[*] Estos softwares no deben de estar instalados a no ser que sean necesarios:${RESET}"
 # Lista de paquetes a verificar
 packages=("autofs" "avahi-daemon" "bind9" "dnsmasq" "vsftpd" "ftp" "slapd" "dovecot-imapd" "nfs-kernel-server" "ypserv" "cups" "rpcbind" "rsync" "samba" "snmpd" "tftpd-hpa" "squid" "apache2" "nginx" "xinetd" "xserver-common" "isc-dhcp-server" "nis" "rsh-client" "talk" "telnet" "inetutils-telnet" "ldap-utils" "tnftp")
 
@@ -13,14 +8,14 @@ for pkg in "${packages[@]}"; do
     if dpkg-query -s "$pkg" &>/dev/null; then
         echo -e "\e[38;5;210m[-] $pkg is installed"
     else
-        echo -e "\e[32m[+] $pkg is not installed"
+        echo -e "${GREEN}[+] $pkg is not installed"
     fi
 done
-echo -e "\n\e[33m[!] Si el servidor requiere de estos software ignore la advertencia."
+echo -e "\n${YELLOW}[!] Si el servidor requiere de estos software ignore la advertencia."
 
 echo -e "\n"
 
-echo -e "\e[1;34m[*] Asegúrese de que el agente de transferencia de correo está configurado en modo sólo local\e[0m"
+echo -e "\e[1;34m[*] Asegúrese de que el agente de transferencia de correo está configurado en modo sólo local${RESET}"
 # Arrays para almacenar los resultados
 a_output=()
 a_output2=()
@@ -59,12 +54,12 @@ fi
 
 # Resultado de la auditoría
 if [ "${#a_output2[@]}" -le 0 ]; then
-    printf "Audit Result:\n${GREEN} ** PASS ** ${RESET}\n"
+    printf "\n${GREEN} ** PASS ** ${RESET}\n"
     for line in "${a_output[@]}"; do
         printf "${GREEN}%s\n${RESET}" "$line"
     done
 else
-    printf "Audit Result:\n${RED} ** FAIL ** ${RESET}\n"
+    printf "\n${RED} ** FAIL ** ${RESET}\n"
     printf " * Reasons for audit failure *\n"
     for line in "${a_output2[@]}"; do
         printf "${RED}%s\n${RESET}" "$line"

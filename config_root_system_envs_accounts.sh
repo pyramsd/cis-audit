@@ -1,35 +1,34 @@
-echo -e "\e[1;34m[*] Configuracion de la cuenta root\e[0m"
-output=$(awk -F: '($3 == 0) { print $1":"$3 }' /etc/passwd)
-if [[ $output == "root:0" ]]; then
-        echo -e "\e[32m[+] UID root: $output"
-else
-        echo -e "\e[38;5;210m[-] UID root NO es 0: $output"
-fi
+echo -e "\e[1;34m[*] Configuracion de la cuenta root${RESET}"
+# Array de comprobaciones: comando;valor_esperado;mensaje
+checks=(
+  "$(awk -F: '($3 == 0) { print $3 }' /etc/passwd);0;UID root"
+  "$(awk -F: '($1 !~ /^(sync|shutdown|halt|operator)/ && $4=="0") {print $4}' /etc/passwd);0;GID de root"
+  "$(awk -F: '$3=="0"{print $3}' /etc/group);0;Grupo root"
+)
 
-output=$(awk -F: '($1 !~ /^(sync|shutdown|halt|operator)/ && $4=="0") {print $1":"$4}' /etc/passwd)
-if [[ $output == "root:0" ]]; then
-        echo -e "\e[32m[+] GID de root: $output"
-else
-        echo -e "\e[38;5;210m[-] GID de root: $output"
-fi
+# Procesar cada verificación
+for check in "${checks[@]}"; do
+  IFS=";" read -r output expected label <<< "$check"
+  if [[ "$output" == "$expected" ]]; then
+    echo -e "${GREEN}[+] $label: $output${RESET}"
+  else
+    echo -e "${RED}[-] $label inesperado: $output${RESET}"
+  fi
+done
+echo -e "\n"
 
-output=$(awk -F: '$3=="0"{print $1":"$3}' /etc/group)
-if [[ $output == "root:0" ]]; then
-        echo -e "\e[32m[+] GID del grupo root: $output"
+echo -e "\e[1;34m[*] Estado de password de root${RESET}"
+user_paswordState="$(passwd -S root | awk '{print $2}');L;Usuario root"
+IFS=";" read -r output expected label <<< "$user_paswordState"
+if [[ "$output" == "$expected" ]]; then
+    echo -e "${GREEN}[+] $label: $output -> Locked${RESET}"
 else
-        echo -e "\e[38;5;210m[-] GID del grupo root: $output"
-fi
-
-output=$(passwd -S root | awk '$2 ~ /^(P|L)/ {print "User: \"" $1 "\" Password is status: " $2}')
-if [[ $output == *"Password is status: L"* || $output == *"Password is status: P"* ]]; then
-        echo -e "\e[32m[+] $output"
-else
-        echo -e "\e[38;5;210m[-] $output"
+    echo -e "${RED}[-] $label inesperado: $output${RESET}"
 fi
 
 echo -e "\n"
 
-echo -e "\e[1;34m[*] Integridad de la ruta root garantizada\e[0m"
+echo -e "\e[1;34m[*] Integridad de la ruta root garantizada${RESET}"
 # Inicialización de variables
 l_output2=""                      # Almacena los mensajes de error
 l_pmask="0022"                   # Máscara de permisos predeterminada
@@ -73,26 +72,26 @@ done
 
 # Mostrar resultados de la auditoría con colores
 if [ -z "$l_output2" ]; then
-  echo -e "\e[32m- Audit Result:\n *** PASS ***\n - Root's path is correctly configured\e[0m"
+  echo -e "${GREEN}- Audit Result:\n *** PASS ***\n - Root's path is correctly configured${RESET}"
 else
-  echo -e "\e[38;5;210m- Audit Result:\n ** FAIL **\n - * Reasons for audit failure * :\n$l_output2\e[0m"
+  echo -e "\e[38;5;210m- Audit Result:\n ** FAIL **\n - * Reasons for audit failure * :\n$l_output2${RESET}"
 fi
 
 echo -e "\n"
 
-echo -e "\e[1;34m[*] Usuario root umask configurado\e[0m"
+echo -e "\e[1;34m[*] Usuario root umask configurado${RESET}"
 shell=$(basename "$SHELL")
 output=$(grep -Psi -- '^\h*umask\h+(([0-7][0-7][01][0-7]\b|[0-7][0-7][0-7][0-6]\b)|([0-7][01][0-7]\b|[0-7][0-7][0-6]\b)|(u=[rwx]{1,3},)?(((g=[rx]?[rx]?w[rx]?[rx]?\b)(,o=[rwx]{1,3})?)|((g=[wrx]{1,3},)?o=[wrx]{1,3}\b)))' /root/.profile /root/.${shell}rc)
 exit_code=$?
 if [[ $exit_code -ne 0 ]]; then
-        echo -e "\e[32m[+] Usuario root umask correctamente configurado"
+        echo -e "${GREEN}[+] Usuario root umask correctamente configurado"
 else
         ecjo -e "\e[38;5;210m[-] Usuario root umask incorrectamente configurado\n -> $output"
 fi
 
 echo -e "\n"
 
-echo -e "\e[1;34m[*] Las cuentas del sistema no deben tener un shell de inicio valido\e[0m"
+echo -e "\e[1;34m[*] Las cuentas del sistema no deben tener un shell de inicio valido${RESET}"
 # Crear una lista de shells válidos a partir del archivo /etc/shells
 l_valid_shells="^($(awk -F\/ '$NF != "nologin" {print}' /etc/shells | \
 sed -rn '/^\//{s,/,\\\\/,g;p}' | paste -s -d '|' -))$"
@@ -110,15 +109,15 @@ result=$(awk -v pat="$l_valid_shells" -F: '
 
 # Verificar si el resultado está vacío y mostrar mensajes con colores
 if [[ -z "$result" ]]; then
-        echo -e "\e[32m[+] Servicios del sistema sin shell valido\e[0m"
+        echo -e "${GREEN}[+] Servicios del sistema sin shell valido${RESET}"
 else
-        echo -e "\e[38;5;210m[!]Servicios del sistema con shell valido:\e[0m"
+        echo -e "\e[38;5;210m[!]Servicios del sistema con shell valido:${RESET}"
         echo "$result"
 fi
 
 echo -e "\n"
 
-echo -e "\e[1;34m[*] Las cuentas sin un login shell válido deben estart bloqueadas\e[0m"
+echo -e "\e[1;34m[*] Las cuentas sin un login shell válido deben estart bloqueadas${RESET}"
 # Crear una lista de shells válidos a partir del archivo /etc/shells
 l_valid_shells="^($(awk -F\/ '$NF != "nologin" {print}' /etc/shells | \
 sed -rn '/^\//{s,/,\\\\/,g;p}' | paste -s -d '|' -))$"
@@ -145,8 +144,9 @@ done <<< "$invalid_shell_users"
 # Mostrar mensajes de auditoría según el resultado
 if [ -z "$output" ]; then
   # Si no hay resultados, la auditoría fue exitosa
-  echo -e "\e[32mAudit was successful: No issues found.\e[0m"
+  echo -e "${GREEN}Audit was successful: No issues found.${RESET}"
 else
   # Si hay resultados, la auditoría falló
-  echo -e "\e[38;5;210mAudit failed: Issues detected.\e[0m"
+  echo -e "\e[38;5;210mAudit failed: Issues detected.${RESET}"
   echo "$output"
+fi

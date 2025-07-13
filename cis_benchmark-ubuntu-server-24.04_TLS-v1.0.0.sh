@@ -1,9 +1,6 @@
 #!/usr/bin/bash
 
-# Colors
-GREEN="\033[0;32m"
-RED="\033[0;31m"
-RESET="\033[0m"
+source "$(dirname "$0")/constantes/Colores.sh"
 
 # Services - Configure Server and Clients Services
 source config_server_clients_services.sh
