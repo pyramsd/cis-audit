@@ -1,6 +1,6 @@
 installed_firewalls=0
 
-echo -e "\e[1;34m[*] Configuracion de firewall${RESET}"
+echo -e "${BLUE}[*] Configuracion de firewall${RESET}"
 #firewalls=('ufw' 'nftables' 'iptables' 'iptables-persistent')
 firewalls=('ufw' 'nftables')
 for frw in "${firewalls[@]}"; do
@@ -42,14 +42,14 @@ if [ ${#active_firewall[@]} -eq 1 ]; then
     firewall="${active_firewall[0]}"
     echo -e "\n${GREEN}[+] Un firewall en uso: '$firewall'"
 
-    echo -e "\n\e[1;34m[*] Estado del servicio $firewall${RESET}"
+    echo -e "\n${BLUE}[*] Estado del servicio $firewall${RESET}"
     fw_enabled=$(systemctl is-enabled "$firewall")
     fw_active=$(systemctl is-active "$firewall")
 
     [[ $fw_enabled == "enabled" ]] && echo -e "${GREEN}[+] $fw_enabled${RESET}" || echo -e "\e[38;5;210m[!] $fw_enabled${RESET}"
     [[ $fw_active == "active" ]] && echo -e "${GREEN}[+] $fw_active${RESET}" || echo -e "\e[38;5;210m[!] $fw_active${RESET}"
 
-    echo -e "\n\e[1;34m[*] Reglas activas:${RESET}"
+    echo -e "\n${BLUE}[*] Reglas activas:${RESET}"
 
     case "$firewall" in
         ufw)
@@ -62,7 +62,7 @@ if [ ${#active_firewall[@]} -eq 1 ]; then
             fi
 
             # Auditoría específica para UFW
-            echo -e "\n\e[1;34m[*] Comprobación de tráfico loopback en UFW${RESET}"
+            echo -e "\n${BLUE}[*] Comprobación de tráfico loopback en UFW${RESET}"
             if [[ $ufw_status =~ Anywhere.*DENY.IN.*127\.0\.0\.0/8 || $ufw_status =~ Anywhere.\(v6\).*DENY.IN.*::1 ]]; then
                 echo -e "${GREEN}[+] Loopback configurado correctamente${RESET}"
             else
@@ -74,7 +74,7 @@ if [ ${#active_firewall[@]} -eq 1 ]; then
                 echo -e "# ufw deny in from ::1"
             fi
 
-            echo -e "\n\e[1;34m[*] Revisión de puertos abiertos sin reglas UFW${RESET}"
+            echo -e "\n${BLUE}[*] Revisión de puertos abiertos sin reglas UFW${RESET}"
             a_ufwout=()
             while read -r l_ufwport; do
               [ -n "$l_ufwport" ] && a_ufwout+=("$l_ufwport")
@@ -96,7 +96,7 @@ if [ ${#active_firewall[@]} -eq 1 ]; then
               echo -e "${GREEN}[+] Todos los puertos abiertos tienen reglas en UFW${RESET}"
             fi
 
-            echo -e "\n\e[1;34m[*] Política predeterminada de UFW${RESET}"
+            echo -e "\n${BLUE}[*] Política predeterminada de UFW${RESET}"
             deny_permissions=$(ufw status verbose | grep "Default:" | sed 's/[[:space:]]*$//')
             if [[ $deny_permissions == "Default: deny (incoming), deny (outgoing), deny (routed)" ]]; then
                 echo -e "${GREEN}[+] $deny_permissions${RESET}"

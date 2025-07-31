@@ -1,4 +1,4 @@
-echo -e "\e[1;34m[*] Configuracion de la cuenta root${RESET}"
+echo -e "${BLUE}[*] Configuracion de la cuenta root${RESET}"
 # Array de comprobaciones: comando;valor_esperado;mensaje
 checks=(
   "$(awk -F: '($3 == 0) { print $3 }' /etc/passwd);0;UID root"
@@ -18,7 +18,7 @@ for check in "${checks[@]}"; do
 done
 echo -e "\n"
 
-echo -e "\e[1;34m[*] Estado de password de root${RESET}"
+echo -e "${BLUE}[*] Estado de password de root${RESET}"
 user_paswordState="$(passwd -S root | awk '{print $2}');L;Usuario root"
 IFS=";" read -r output expected label <<< "$user_paswordState"
 if [[ "$output" == "$expected" ]]; then
@@ -30,7 +30,7 @@ fi
 
 echo -e "\n"
 
-echo -e "\e[1;34m[*] Integridad de la ruta root garantizada${RESET}"
+echo -e "${BLUE}[*] Integridad de la ruta root garantizada${RESET}"
 # Inicialización de variables
 l_output2=""                      # Almacena los mensajes de error
 l_pmask="0022"                   # Máscara de permisos predeterminada
@@ -82,7 +82,7 @@ fi
 
 echo -e "\n"
 
-echo -e "\e[1;34m[*] Usuario root umask configurado${RESET}"
+echo -e "${BLUE}[*] Usuario root umask configurado${RESET}"
 shell=$(basename "$SHELL")
 output=$(grep -Psi -- '^\h*umask\h+(([0-7][0-7][01][0-7]\b|[0-7][0-7][0-7][0-6]\b)|([0-7][01][0-7]\b|[0-7][0-7][0-6]\b)|(u=[rwx]{1,3},)?(((g=[rx]?[rx]?w[rx]?[rx]?\b)(,o=[rwx]{1,3})?)|((g=[wrx]{1,3},)?o=[wrx]{1,3}\b)))' /root/.profile /root/.${shell}rc)
 exit_code=$?
@@ -95,7 +95,7 @@ fi
 
 echo -e "\n"
 
-echo -e "\e[1;34m[*] Las cuentas del sistema no deben tener un shell de inicio valido${RESET}"
+echo -e "${BLUE}[*] Las cuentas del sistema no deben tener un shell de inicio valido${RESET}"
 # Crear una lista de shells válidos a partir del archivo /etc/shells
 l_valid_shells="^($(awk -F\/ '$NF != "nologin" {print}' /etc/shells | \
 sed -rn '/^\//{s,/,\\\\/,g;p}' | paste -s -d '|' -))$"
@@ -122,7 +122,7 @@ fi
 
 echo -e "\n"
 
-echo -e "\e[1;34m[*] Las cuentas sin un login shell válido deben estart bloqueadas${RESET}"
+echo -e "${BLUE}[*] Las cuentas sin un login shell válido deben estart bloqueadas${RESET}"
 # Crear una lista de shells válidos a partir del archivo /etc/shells
 l_valid_shells="^($(awk -F\/ '$NF != "nologin" {print}' /etc/shells | \
 sed -rn '/^\//{s,/,\\\\/,g;p}' | paste -s -d '|' -))$"

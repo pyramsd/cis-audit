@@ -1,4 +1,4 @@
-echo -e "\e[1;34m[*] Sudo instalado${RESET}"
+echo -e "${BLUE}[*] Sudo instalado${RESET}"
 if dpkg-query -s sudo &>/dev/null; then
     echo -e "${GREEN}[+] Sudo instalado\n"
     counter=$((counter + 1))
@@ -7,7 +7,7 @@ else
 fi
 
 
-echo -e "\e[1;34m[*] Los comandos sudo utilizan pty${RESET}"
+echo -e "${BLUE}[*] Los comandos sudo utilizan pty${RESET}"
 output1=$(grep -rPi -- '^\h*Defaults\h+([^#\n\r]+,\h*)?use_pty\b' /etc/sudoers*)
 output2=$(grep -rPi -- '^\h*Defaults\h+([^#\n\r]+,\h*)?!use_pty\b' /etc/sudoers*)
 exit_code2=$?
@@ -20,7 +20,7 @@ fi
 
 echo -e "\n"
 
-echo -e "\e[1;34m[[*] El archivo de registro sudo${RESET}"
+echo -e "${BLUE}[*] El archivo de registro sudo${RESET}"
 output=$(grep -rPsi "^\h*Defaults\h+([^#]+,\h*)?logfile\h*=\h*(\"|\')?\H+(\"|\')?(,\h*\H+\h*)*\h*(#.*)?$" /etc/sudoers*)
 if [[ $output == *"logfile"* ]]; then
         echo -e "${GREEN}[+] $output"
@@ -34,7 +34,7 @@ fi
 
 echo -e "\n"
 
-echo -e "\e[1;34m[*] Garantizar que los usuarios deban proporcionar una contraseña para la elevación de privilegios${RESET}"
+echo -e "${BLUE}[*] Garantizar que los usuarios deban proporcionar una contraseña para la elevación de privilegios${RESET}"
 output=$(sudo grep -r "^[^#].*NOPASSWD" /etc/sudoers*)
 exit_code=$?
 if [[ $exit_code -eq 0 ]]; then
@@ -46,7 +46,7 @@ fi
 
 echo -e "\n"
 
-echo -e "\e[1;34m[*] La reautenticación para la escalada de privilegios no está desactivada globalmente${RESET}"
+echo -e "${BLUE}[*] La reautenticación para la escalada de privilegios no está desactivada globalmente${RESET}"
 output=$(sudo grep -r "^[^#].*\!authenticate" /etc/sudoers*)
 exit_code=$?
 if [[ $exit_code -eq 1 ]]; then
@@ -58,7 +58,7 @@ fi
 
 echo -e "\n"
 
-echo -e "\e[1;34m[*] Tiempo de espera de autenticación sudo configurado correctamente${RESET}"
+echo -e "${BLUE}[*] Tiempo de espera de autenticación sudo configurado correctamente${RESET}"
 output=$(grep -roP "timestamp_timeout=\K[0-9]*" /etc/sudoers*)
 if [[ -n $output ]]; then
         echo -e "${GREEN}[+] TimeStamp configurado:\n$output\nEl valor no tiene que ser tan alto"
@@ -80,7 +80,7 @@ fi
 
 echo -e "\n"
 
-echo -e "\e[1;34m[*] Asegurarse de que el acceso al comando su está restringido${RESET}"
+echo -e "${BLUE}[*] Asegurarse de que el acceso al comando su está restringido${RESET}"
 # Verificar si pam_wheel.so está configurado
 config=$(grep -E '^\s*auth\s+required\s+pam_wheel\.so' /etc/pam.d/su)
 

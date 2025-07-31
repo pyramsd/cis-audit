@@ -10,7 +10,7 @@ declare -A cron_paths=(
     ["/etc/cron.d"]="700:root:root"
 )
 
-echo -e "\e[1;34m[*] Permisos de los archivos del servicio Cron\e[0m"
+echo -e "${BLUE}[*] Permisos de los archivos del servicio Cron\e[0m"
 if ! dpkg -s cron &>/dev/null; then
     echo -e "\e[38;5;210m[!] Cron no está instalado en el sistema.\e[0m"
     echo -e "\e[33m[!]Instalar y habilitar Cron si es necesario.\e[0m"

@@ -1,4 +1,4 @@
-echo -e "\e[1;34m[*] Permisos de los archivos del sistema"
+echo -e "${BLUE}[*] Permisos de los archivos del sistema"
 echo -e "(permission bits in octal/user ID of owner/group name of owner)${RESET}"
 system_files=(
     "/etc/passwd:0644:0/root:0/root"

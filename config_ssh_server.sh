@@ -1,4 +1,4 @@
-echo -e "\e[1;34m[*] Permisos de /etc/ssh/sshd_config configurados adecuadamente${RESET}"
+echo -e "${BLUE}[*] Permisos de /etc/ssh/sshd_config configurados adecuadamente${RESET}"
 # Definición de variables
 a_output=()
 a_output2=()
@@ -50,7 +50,7 @@ fi
 
 echo -e "\n"
 
-echo -e "\e[1;34m[*] Permisos de los archivos de claves de host privadas SSH configuradas${RESET}"
+echo -e "${BLUE}[*] Permisos de los archivos de claves de host privadas SSH configuradas${RESET}"
 # Declaración de variables
 a_output=()
 a_output2=()
@@ -108,7 +108,7 @@ fi
 
 echo -e "\n"
 
-echo -e "\e[1;34m[*] Permisos de los archivos de claves de host publicas SSH configuradas${RESET}"
+echo -e "${BLUE}[*] Permisos de los archivos de claves de host publicas SSH configuradas${RESET}"
 # Declaración de variables
 a_output=()
 a_output2=()
@@ -170,7 +170,7 @@ fi
 
 echo -e "\n"
 
-echo -e "\e[1;34m[*] Permisos de acceso SSH${RESET}"
+echo -e "${BLUE}[*] Permisos de acceso SSH${RESET}"
 output=$(sshd -T | grep -Pi -- '^\h*(allow|deny)(users|groups)\h+\H+')
 exit_code=$?
 
@@ -186,7 +186,7 @@ fi
 
 echo -e "\n"
 
-echo -e "\e[1;34m[*] Cifrados SSH configurados${RESET}"
+echo -e "${BLUE}[*] Cifrados SSH configurados${RESET}"
 output=$(sshd -T 2>&1 | grep -Pi -- '^ciphers\h+\"?([^#\n\r]+,)?((3des|blowfish|cast128|aes(128|192|256))-cbc|arcfour(128|256)?|rijndael-cbc@lysator\.liu\.se|chacha20-poly1305@openssh\.com)\b')
 exit_code=$?
 if [ $exit_code -ne 0 ]; then
@@ -198,7 +198,7 @@ fi
 
 echo -e "\n"
 
-echo -e "\e[1;34m[*] Configuraciones de /etc/sshd_config${RESET}"
+echo -e "${BLUE}[*] Configuraciones de /etc/sshd_config${RESET}"
 configs=('disableforwarding' 'gssapiauthentication' 'hostbasedauthentication' 'ignorerhosts' 'loglevel' 'logingracetime' 'maxauthtries' 'permitemptypasswords' 'permituserenvironment' 'maxstartups' 'PermitRootLogin' 'clientaliveinterval' 'clientalivecountmax')
 for config in "${configs[@]}"; do
         output=$(sshd -T | grep -i ^$config)
@@ -272,7 +272,7 @@ echo -e "\e[33m[!] Para añadir o modificar configuraciones: /etc/ssh/sshd_confi
 
 echo -e "\n"
 
-echo -e "\e[1;34m[*] KexAlgorithms correctamente configurado${RESET}"
+echo -e "${BLUE}[*] KexAlgorithms correctamente configurado${RESET}"
 #output=$(sshd -T | grep -Pi -- 'kexalgorithms\h+([^#\n\r]+,)?(diffie-hellman-group1-sha1|diffie-hellman-group14-sha1|diffie-hellman-group-exchange-sha1)\b')
 output2=$(sshd -T | grep -i 'kexalgorithms')
 output=$(sshd -T | grep -Pi -- 'kexalgorithms\h+([^#\n\r]+,)?(diffie-hellman-group1-sha1|diffie-hellman-group14-sha1|diffie-hellman-group-exchange-sha1)\b')
@@ -290,7 +290,7 @@ fi
 
 echo -e "\n"
 
-echo -e "\e[1;34m[*] sshd MACs estan configurados${RESET}"
+echo -e "${BLUE}[*] sshd MACs estan configurados${RESET}"
 output2=$(sshd -T | grep -i 'macs')
 output=$(sshd -T | grep -Pi -- 'macs\h+([^#\n\r]+,)?(hmac-md5|hmac-md5-96|hmac-ripemd160|hmac-sha1-96|umac-64@openssh\.com|hmac-md5-etm@openssh\.com|hmac-md5-96-etm@openssh\.com|hmac-ripemd160-etm@openssh\.com|hmac-sha1-96-etm@openssh\.com|umac-64-etm@openssh\.com|umac-128-etm@openssh\.com)\b')
 exit_code=$?
@@ -308,7 +308,7 @@ fi
 
 echo -e "\n"
 
-echo -e "\e[1;34m sshd UsePAM activado${RESET}"
+echo -e "${BLUE}[*] sshd UsePAM activado${RESET}"
 output=$(sshd -T | grep -i usepam)
 exit_code=$?
 if [[ $exit_code -ne 0 ]]; then

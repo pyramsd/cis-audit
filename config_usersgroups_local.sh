@@ -1,4 +1,4 @@
-echo -e "\e[1;34m[*] Cuentas de /etc/passwd utilizan contraseñas ocultas${RESET}"
+echo -e "${BLUE}[*] Cuentas de /etc/passwd utilizan contraseñas ocultas${RESET}"
 output=$(awk -F: '($2 != "x" ) { print "User: \"" $1 "\" is not set to shadowed passwords "}' /etc/passwd)
 exit_code=$?
 if [[ $exit_code -eq 0 ]]; then
@@ -10,7 +10,7 @@ fi
 
 echo -e "\n"
 
-echo -e "\e[1;34m[*] Campos de /etc/shadow password no estén vacíos${RESET}"
+echo -e "${BLUE}[*] Campos de /etc/shadow password no estén vacíos${RESET}"
 output=$(awk -F: '($2 == "" ) { print $1 " does not have a password "}' /etc/shadow)
 exit_code=$?
 if [[ $exit_code -eq 0 ]]; then
@@ -22,7 +22,7 @@ fi
 
 echo -e "\n"
 
-echo -e "\e[1;34m[*] Los grupos de /etc/passwd existen en /etc/group${RESET}"
+echo -e "${BLUE}[*] Los grupos de /etc/passwd existen en /etc/group${RESET}"
 # Obtener GIDs únicos desde /etc/passwd
 mapfile -t a_passwd_group_gid < <(awk -F: '{print $4}' /etc/passwd | sort -u)
 
@@ -57,7 +57,7 @@ unset a_passwd_group_diff
 
 echo -e "\n"
 
-echo -e "\e[1;34m[*] Grupo shadow vacio${RESET}"
+echo -e "${BLUE}[*] Grupo shadow vacio${RESET}"
 output1=$(awk -F: '($1=="shadow") {print $NF}' /etc/group)
 exit_code1=$?
 output2=$(awk -F: '($4 == '"$(getent group shadow | awk -F: '{print $3}' | xargs)"') {print " - user: \"" $1 "\" primary group is the shadow group"}' /etc/passwd)
@@ -71,7 +71,7 @@ fi
 
 echo -e "\n"
 
-echo -e "\e[1;34m[*] UIDs duplicados no existente${RESET}"
+echo -e "${BLUE}[*] UIDs duplicados no existente${RESET}"
 {
     # Inicializar una variable para rastrear duplicados
     has_duplicates=0
@@ -100,7 +100,7 @@ echo -e "\e[1;34m[*] UIDs duplicados no existente${RESET}"
 
 echo -e "\n"
 
-echo -e "\e[1;34m[*] GIDs duplicados no existente${RESET}"
+echo -e "${BLUE}[*] GIDs duplicados no existente${RESET}"
 {
     # Inicializar una variable para rastrear duplicados
     has_duplicates=0
@@ -129,7 +129,7 @@ echo -e "\e[1;34m[*] GIDs duplicados no existente${RESET}"
 
 echo -e "\n"
 
-echo -e "\e[1;34m[*] Usuarios duplicados no existente${RESET}"
+echo -e "${BLUE}[*] Usuarios duplicados no existente${RESET}"
 {
     # Inicializar una variable para rastrear duplicados
     has_duplicates=0
@@ -158,7 +158,7 @@ echo -e "\e[1;34m[*] Usuarios duplicados no existente${RESET}"
 
 echo -e "\n"
 
-echo -e "\e[1;34m[*] Grupos duplicado no existente${RESET}"
+echo -e "${BLUE}[*] Grupos duplicado no existente${RESET}"
 {
     # Inicializar una variable para rastrear duplicados
     has_duplicates=0

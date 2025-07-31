@@ -1,5 +1,5 @@
 # Software que no deben estar instalados a primera instancia
-echo -e "\e[1;34m[*] Estos softwares no deben de estar instalados a no ser que sean necesarios:${RESET}"
+echo -e "${BLUE}[*] Estos softwares no deben de estar instalados a no ser que sean necesarios:${RESET}"
 # Lista de paquetes a verificar
 packages=("autofs" "avahi-daemon" "bind9" "dnsmasq" "vsftpd" "ftp" "slapd" "dovecot-imapd" "nfs-kernel-server" "ypserv" "cups" "rpcbind" "rsync" "samba" "snmpd" "tftpd-hpa" "squid" "apache2" "nginx" "xinetd" "xserver-common" "isc-dhcp-server" "nis" "rsh-client" "talk" "telnet" "inetutils-telnet" "ldap-utils" "tnftp")
 
@@ -16,7 +16,7 @@ echo -e "\n${YELLOW}[!] Si el servidor requiere de estos software ignore la adve
 
 echo -e "\n"
 
-echo -e "\e[1;34m[*] Asegúrese de que el agente de transferencia de correo está configurado en modo sólo local${RESET}"
+echo -e "${BLUE}[*] Asegúrese de que el agente de transferencia de correo está configurado en modo sólo local${RESET}"
 # Arrays para almacenar los resultados
 a_output=()
 a_output2=()
