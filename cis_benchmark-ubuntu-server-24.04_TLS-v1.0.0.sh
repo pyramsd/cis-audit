@@ -42,3 +42,5 @@ echo -e "\n"
 source config_system_file_permissions.sh
 
 echo $counter
+resultado=$(calcular_porcentaje "$counter")
+echo "Porcentaje de seguridad: $resultado"

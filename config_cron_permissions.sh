@@ -16,13 +16,21 @@ if ! dpkg -s cron &>/dev/null; then
     echo -e "\e[33m[!]Instalar y habilitar Cron si es necesario.\e[0m"
 else
     echo -e "\e[32m[+] Cron instalado"
+    counter=$((counter + 1))
 
     # Verificar el estado del servicio cron
     cron_enabled=$(systemctl is-enabled cron)
     cron_activated=$(systemctl is-active cron)
 
-    [[ $cron_enabled == "enabled" ]] && echo -e "\e[32m[+] Cron: $cron_enabled\e[0m" || echo -e "\e[38;5;210m[!] Cron: $cron_enabled\e[0m"
-    [[ $cron_activated == "active" ]] && echo -e "\e[32m[+] Cron: $cron_activated\e[0m\n" || echo -e "\e[38;5;210m[!] Cron: $cron_activated\e[0m\n"
+    [[ $cron_enabled == "enabled" ]] && {
+        echo -e "\e[32m[+] Cron: $cron_enabled\e[0m"
+        counter=$((counter + 1))
+    } || echo -e "\e[38;5;210m[!] Cron: $cron_enabled\e[0m"
+    
+    [[ $cron_activated == "active" ]] && {
+        echo -e "\e[32m[+] Cron: $cron_activated\e[0m\n"
+        counter=$((counter + 1))
+    } || echo -e "\e[38;5;210m[!] Cron: $cron_activated\e[0m\n"
 
     # Iterar sobre cada archivo y verificar permisos
     for file in "${!cron_paths[@]}"; do
