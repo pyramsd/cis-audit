@@ -11,6 +11,7 @@ for check in "${checks[@]}"; do
   IFS=";" read -r output expected label <<< "$check"
   if [[ "$output" == "$expected" ]]; then
     echo -e "${GREEN}[+] $label: $output${RESET}"
+    counter=$((counter + 1))
   else
     echo -e "${RED}[-] $label inesperado: $output${RESET}"
   fi
@@ -22,6 +23,7 @@ user_paswordState="$(passwd -S root | awk '{print $2}');L;Usuario root"
 IFS=";" read -r output expected label <<< "$user_paswordState"
 if [[ "$output" == "$expected" ]]; then
     echo -e "${GREEN}[+] $label: $output -> Locked${RESET}"
+    counter=$((counter + 1))
 else
     echo -e "${RED}[-] $label inesperado: $output${RESET}"
 fi
@@ -73,6 +75,7 @@ done
 # Mostrar resultados de la auditoría con colores
 if [ -z "$l_output2" ]; then
   echo -e "${GREEN}- Audit Result:\n *** PASS ***\n - Root's path is correctly configured${RESET}"
+  counter=$((counter + 1))
 else
   echo -e "\e[38;5;210m- Audit Result:\n ** FAIL **\n - * Reasons for audit failure * :\n$l_output2${RESET}"
 fi
@@ -85,6 +88,7 @@ output=$(grep -Psi -- '^\h*umask\h+(([0-7][0-7][01][0-7]\b|[0-7][0-7][0-7][0-6]\
 exit_code=$?
 if [[ $exit_code -ne 0 ]]; then
         echo -e "${GREEN}[+] Usuario root umask correctamente configurado"
+        counter=$((counter + 1))
 else
         ecjo -e "\e[38;5;210m[-] Usuario root umask incorrectamente configurado\n -> $output"
 fi
@@ -110,6 +114,7 @@ result=$(awk -v pat="$l_valid_shells" -F: '
 # Verificar si el resultado está vacío y mostrar mensajes con colores
 if [[ -z "$result" ]]; then
         echo -e "${GREEN}[+] Servicios del sistema sin shell valido${RESET}"
+        counter=$((counter + 1))
 else
         echo -e "\e[38;5;210m[!]Servicios del sistema con shell valido:${RESET}"
         echo "$result"
@@ -145,6 +150,7 @@ done <<< "$invalid_shell_users"
 if [ -z "$output" ]; then
   # Si no hay resultados, la auditoría fue exitosa
   echo -e "${GREEN}Audit was successful: No issues found.${RESET}"
+  counter=$((counter + 1))
 else
   # Si hay resultados, la auditoría falló
   echo -e "\e[38;5;210mAudit failed: Issues detected.${RESET}"

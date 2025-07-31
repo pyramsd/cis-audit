@@ -32,6 +32,7 @@ else
         echo "Permisos de $file:"
         if [[ "$actual_permissions" == "$expected_permissions" ]]; then
             echo -e "\e[32m[+] $actual_permissions\e[0m\n"
+            counter=$((counter + 1))
         else
             echo -e "\e[38;5;210m[-] $actual_permissions \e[33m-> $expected_permissions\e[0m\n"
         fi

@@ -1,6 +1,7 @@
 echo -e "\e[1;34m[*] Sudo instalado${RESET}"
 if dpkg-query -s sudo &>/dev/null; then
     echo -e "${GREEN}[+] Sudo instalado\n"
+    counter=$((counter + 1))
 else
     echo -e "\e[38;5;210m[-] Sudo no instalado"
 fi
@@ -12,6 +13,7 @@ output2=$(grep -rPi -- '^\h*Defaults\h+([^#\n\r]+,\h*)?!use_pty\b' /etc/sudoers*
 exit_code2=$?
 if [[ $output1 == *"use_pty"* && $exit_code2 -ne 0 ]]; then
     echo -e "${GREEN}[+] $output1"
+    counter=$((counter + 1))
 else
     echo -e "\e[38;5;210m[-] $output1 $output2"
 fi
@@ -22,6 +24,7 @@ echo -e "\e[1;34m[[*] El archivo de registro sudo${RESET}"
 output=$(grep -rPsi "^\h*Defaults\h+([^#]+,\h*)?logfile\h*=\h*(\"|\')?\H+(\"|\')?(,\h*\H+\h*)*\h*(#.*)?$" /etc/sudoers*)
 if [[ $output == *"logfile"* ]]; then
         echo -e "${GREEN}[+] $output"
+        counter=$((counter + 1))
 else
         echo -e "\e[38;5;210m[-] El archivo log de sudo no existe"
         echo -e "${YELLOW}[!] Para corregir:"
@@ -38,6 +41,7 @@ if [[ $exit_code -eq 0 ]]; then
         echo -e "\e[38;5;210m[-] No todos los usuarios deben proporcionar clave\n -> $output"
 else
         echo -e "${GREEN}[+] Todos los usuarios deben proporcionar clave"
+        counter=$((counter + 1))
 fi
 
 echo -e "\n"
@@ -47,6 +51,7 @@ output=$(sudo grep -r "^[^#].*\!authenticate" /etc/sudoers*)
 exit_code=$?
 if [[ $exit_code -eq 1 ]]; then
         echo -e "${GREEN}[+] La reautenticacion de privilegios no esta desactivada globalmente"
+        counter=$((counter + 1))
 else
         echo -e "\e[38;5;210m[-] La reautenticacion de privilegios esta desactivada globalmente\n$output"
 fi
@@ -57,6 +62,7 @@ echo -e "\e[1;34m[*] Tiempo de espera de autenticación sudo configurado correct
 output=$(grep -roP "timestamp_timeout=\K[0-9]*" /etc/sudoers*)
 if [[ -n $output ]]; then
         echo -e "${GREEN}[+] TimeStamp configurado:\n$output\nEl valor no tiene que ser tan alto"
+        counter=$((counter + 1))
 else
         output=$(sudo -V | grep -i "Authentication timestamp timeout:")
         if [[ -n $output ]]; then
@@ -68,6 +74,7 @@ else
                 echo -e 'Defaults\tenv_reset'
         else
                 echo -e "${GREEN}[+] TimeSttamp configurado:\n$output\n. Por defecto es 15 minutos"
+                counter=$((counter + 1))
         fi
 fi
 
@@ -89,6 +96,7 @@ else
     users=$(grep "^$group:" /etc/group | cut -d: -f4)
     if [[ -z "$users" ]]; then
         echo -e "${GREEN}[+] Configuración correcta: su está restringido al grupo '$group' y el grupo está vacío${RESET}"
+        counter=$((counter + 1))
     else
         echo -e "\e[38;5;210m[-] El grupo '$group' tiene usuarios: $users${RESET}"
     fi

@@ -3,6 +3,7 @@ output=$(awk -F: '($2 != "x" ) { print "User: \"" $1 "\" is not set to shadowed 
 exit_code=$?
 if [[ $exit_code -eq 0 ]]; then
         echo -e "${GREEN}[+] Las cuentas usan clave secreta${RESET}"
+        counter=$((counter + 1))
 else
         echo -e "${RED}[-] Las cuentas no usan clave secreta:\n-> $output${RESET}"
 fi
@@ -14,6 +15,7 @@ output=$(awk -F: '($2 == "" ) { print $1 " does not have a password "}' /etc/sha
 exit_code=$?
 if [[ $exit_code -eq 0 ]]; then
         echo -e "${GREEN}[+] Campos de /etc/shadow password no vacios${RESET}"
+        counter=$((counter + 1))
 else
         echo -e "${RED}[-] Campos de /etc/shadow password vacios:\n-> $output${RESET}"
 fi
@@ -35,6 +37,7 @@ mapfile -t a_passwd_group_diff < <(
 # Verificar y mostrar usuarios con GIDs inexistentes en /etc/group
 if [ ${#a_passwd_group_diff[@]} -eq 0 ]; then
         echo -e "${GREEN}[+] Todos los grupos de /etc/passwd existen en /etc/group"
+        counter=$((counter + 1))
 else
         echo -e "\e[38;5;210m[!] Algunos GIDs de /etc/passwd no existen en /etc/group:"
         echo ${a_passwd_group_diff[@]}
@@ -61,6 +64,7 @@ output2=$(awk -F: '($4 == '"$(getent group shadow | awk -F: '{print $3}' | xargs
 exit_code2=$?
 if [[ $exit_code1 -eq 0 && $exit_code2 -eq 0 ]]; then
         echo -e "${GREEN}[+] Grupo shadow vacio"
+        counter=$((counter + 1))
 else
         echo -e "${RED}[-] Grupo shadow no vacia\n-> $output1\n-> $output2"
 fi
@@ -87,6 +91,7 @@ echo -e "\e[1;34m[*] UIDs duplicados no existente${RESET}"
     if [ "$has_duplicates" -eq 0 ]; then
         # Si no hay duplicados, mostrar mensaje en verde
         echo -e "${GREEN}[+] No duplicate UIDs found in /etc/passwd${RESET}"
+        counter=$((counter + 1))
     else
         # Si hubo duplicados, mostrar mensaje adicional en rojo
         echo -e "${RED}[-] Some duplicate UIDs were found in /etc/passwd${RESET}"
@@ -115,6 +120,7 @@ echo -e "\e[1;34m[*] GIDs duplicados no existente${RESET}"
     if [ "$has_duplicates" -eq 0 ]; then
         # Si no hay duplicados, mostrar mensaje en verde
         echo -e "${GREEN}[+] No duplicate GIDs found in /etc/group${RESET}"
+        counter=$((counter + 1))
     else
         # Si hubo duplicados, mostrar mensaje adicional en rojo
         echo -e "${RED}[-] Some duplicate GIDs were found in /etc/group${RESET}"
@@ -143,6 +149,7 @@ echo -e "\e[1;34m[*] Usuarios duplicados no existente${RESET}"
     if [ "$has_duplicates" -eq 0 ]; then
         # Si no hay duplicados, mostrar mensaje en verde
         echo -e "${GREEN}[+] No duplicate names found in /etc/passwd${RESET}"
+        counter=$((counter + 1))
     else
         # Si hubo duplicados, mostrar mensaje adicional en rojo
         echo -e "${RED}[-] Some duplicate names were found in /etc/passwd${RESET}"
@@ -171,6 +178,7 @@ echo -e "\e[1;34m[*] Grupos duplicado no existente${RESET}"
     if [ "$has_duplicates" -eq 0 ]; then
         # Si no hay duplicados, mostrar mensaje en verde
         echo -e "${GREEN}[+] No duplicate groups found in /etc/group${RESET}"
+        counter=$((counter + 1))
     else
         # Si hubo duplicados, mostrar mensaje adicional en rojo
         echo -e "${RED}[-] Some duplicate groups were found in /etc/group${RESET}"

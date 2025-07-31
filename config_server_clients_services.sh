@@ -9,6 +9,7 @@ for pkg in "${packages[@]}"; do
         echo -e "\e[38;5;210m[-] $pkg is installed"
     else
         echo -e "${GREEN}[+] $pkg is not installed"
+        counter=$((counter + 1))
     fi
 done
 echo -e "\n${YELLOW}[!] Si el servidor requiere de estos software ignore la advertencia."
@@ -57,6 +58,7 @@ if [ "${#a_output2[@]}" -le 0 ]; then
     printf "\n${GREEN} ** PASS ** ${RESET}\n"
     for line in "${a_output[@]}"; do
         printf "${GREEN}%s\n${RESET}" "$line"
+        counter=$((counter + 1))
     done
 else
     printf "\n${RED} ** FAIL ** ${RESET}\n"

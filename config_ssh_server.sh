@@ -42,6 +42,7 @@ done < <(find /etc/ssh/sshd_config.d -type f -name '*.conf' \( -perm /077 -o ! -
 # Generar salida dependiendo de si se encontraron errores
 if [ "${#a_output2[@]}" -le 0 ]; then
         printf ${GREEN}'%s\n'${RESET} "- Audit Result:" " ** PASS **" "${a_output[@]}" ""
+        counter=$((counter + 1))
 else
         printf ${RED}'%s\n'${RESET} "- Audit Result:" " ** FAIL **" " - Reason(s) for audit failure:" "${a_output2[@]}"
     [ "${#a_output[@]}" -gt 0 ] && printf '%s\n' "" "- Correctly set:" "${a_output[@]}" ""
@@ -99,6 +100,7 @@ done < <(find -L /etc/ssh -xdev -type f -print0 2>/dev/null)
 # Generar salida dependiendo de si se encontraron errores
 if [ "${#a_output2[@]}" -le 0 ]; then
     printf ${GREEN}'%s\n'${RESET} "- Audit Result:" " ** PASS **" "${a_output[@]}"
+    counter=$((counter + 1))
 else
     printf ${RED}'%s\n'${RESET} "- Audit Result:" " ** FAIL **" " - Reason(s) for audit failure:" "${a_output2[@]}"
     [ "${#a_output[@]}" -gt 0 ] && printf '%s\n' "" "- Correctly set:" "${a_output[@]}"
@@ -160,6 +162,7 @@ done < <(find -L /etc/ssh -xdev -type f -print0 2>/dev/null)
 # Generar salida dependiendo de si se encontraron errores
 if [ "${#a_output2[@]}" -le 0 ]; then
     printf ${GREEN}'%s\n'${RESET} "- Audit Result:" " ** PASS **" "${a_output[@]}" ""
+    counter=$((counter + 1))
 else
     printf ${RED}'%s\n'${RESET} "- Audit Result:" " ** FAIL **" " - Reason(s) for audit failure:" "${a_output2[@]}"
     [ "${#a_output[@]}" -gt 0 ] && printf '%s\n' "" "- Correctly set:" "${a_output[@]}" ""
@@ -178,6 +181,7 @@ if [ $exit_code -ne 0 ]; then
         echo -e "DenyUsers <usuario/s>\nDenyGroups <grupo/s>${RESET}"
 else
         echo -e "${GREEN}[+] Configuracion de acceso\n$output${RESET}"
+        counter=$((counter + 1))
 fi
 
 echo -e "\n"
@@ -189,6 +193,7 @@ if [ $exit_code -ne 0 ]; then
         echo -e "\e[38;5;210m[!] Cifrados no configurados${RESET}"
 else
         echo -e "${GREEN}[+] Cifrados configurados:\n$output\e0m"
+        counter=$((counter + 1))
 fi
 
 echo -e "\n"
@@ -203,15 +208,18 @@ for config in "${configs[@]}"; do
 
                 if [[ "$value" == "yes" ]]; then
                         echo -e "${GREEN}[+] $output"
+                        counter=$((counter + 1))
                 elif [[ "$value" == "no" ]]; then
                         if [[ "$config" == "gssapiauthentication" || "$config" == "hostbasedauthentication" || "$config" == "permitemptypasswords" || "$config" == "permituserenvironment" ]]; then
                                 echo -e "${GREEN}[+] $output"
+                                counter=$((counter + 1))
                         else
                                 echo -e "\e[38;5;210m[-] $output"
                         fi
                 elif [[ "$config" == "loglevel" ]]; then
                         if [[ "$value" == "INFO" || "$value" == "VERBOSE" ]]; then
                                 echo -e "${GREEN}[+] $output"
+                                counter=$((counter + 1))
                         else
                                 echo -e "\e[37;5;210mm[-] $output"
                         fi
@@ -220,22 +228,26 @@ for config in "${configs[@]}"; do
                                 echo -e "\e[38;5;210m[-] $output -> Valor recomendado: 60"
                         else
                                 echo -e "${GREEN}[+] $output"
+                                counter=$((counter + 1))
                         fi
                 elif [[ "$config" == "maxauthtries" ]]; then
                         if [[ "$value" != "4" ]]; then
                                 echo -e "\e[38;5;210m[-] $output -> Valor recomendado: 4"
                         else
                                 echo -e "${GREEN}[+] $output"
+                                counter=$((counter + 1))
                         fi
                 elif [[ "$config" == "maxstartups" ]]; then
                         if [[ "$value" != "10:30:60" ]]; then
                                 echo -e "\e[38;5;210m[-] $output -> Valor recomendado: 10:30:60"
                         else
                                 echo -e "${GREEN}[+] $output"
+                                counter=$((counter + 1))
                         fi
                 elif [[ "$config" == "PermitRootLogin" ]]; then
                         if [[ "$value" == "no" || "$value" == "without-password" ]]; then
                                 echo -e "${GREEN}[+] $output"
+                                counter=$((counter + 1))
                                 if [[ "$value" == "without-password" ]]; then
                                         echo -e "\e[33m    [!] without-password: Permite el acceso root, pero solo si usa una clave SSH"
                                 fi
@@ -245,6 +257,7 @@ for config in "${configs[@]}"; do
                 elif [[ "$config" == "clientalivecountmax" || "$config" == "clientaliveinterval" ]]; then
                         if [[ "$value" =~ ^[0-9]+$ ]]; then
                                 echo -e "${GREEN}[+] $output"
+                                counter=$((counter + 1))
                         else
                                 echo -e "\e[38;5;210m[-] $output -> El valor tiene que ser un numerico"
                         fi
@@ -271,6 +284,7 @@ else
                 echo -e "\e[38;5;210m[!] KexAlgorithms no está habilitado:\n-> $output${RESET}"
         else
                 echo -e "${GREEN}[+] KexAlgorithms habilitado:\n-> $output2${RESET}"
+                counter=$((counter + 1))
         fi
 fi
 
@@ -282,6 +296,7 @@ output=$(sshd -T | grep -Pi -- 'macs\h+([^#\n\r]+,)?(hmac-md5|hmac-md5-96|hmac-r
 exit_code=$?
 if [[ $exit_code -ne 0 ]]; then
         echo -e "${GREEN}[+] Macs sin cifrados debiles:\n-> $output2${RESET}"
+        counter=$((counter + 1))
 else
         if [[ $output == *"macs no"* ]]; then
                 echo -e "\e[38;5;210m[-] Macs no está habilitado:\n-> $output${RESET}"
@@ -303,5 +318,6 @@ else
                 echo -e "\e[38;5;210m[!] UsePam desactivado:\n-> $output${RESET}"
     else
                 echo -e "${GREEN}[+] UsePam activado:\n-> $output${RESET}"
+                counter=$((counter + 1))
         fi
 fi

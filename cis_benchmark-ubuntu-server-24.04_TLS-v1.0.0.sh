@@ -1,6 +1,7 @@
 #!/usr/bin/bash
 
 source "$(dirname "$0")/constantes/Colores.sh"
+source "$(dirname "$0")/vars/counter.sh"
 
 # Services - Configure Server and Clients Services
 source config_server_clients_services.sh
@@ -39,3 +40,5 @@ echo -e "\n"
 
 # System Maintenance - System file permission
 source config_system_file_permissions.sh
+
+echo $counter
