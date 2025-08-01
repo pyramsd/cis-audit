@@ -15,7 +15,7 @@ if ! dpkg -s cron &>/dev/null; then
     echo -e "\e[38;5;210m[!] Cron no está instalado en el sistema.\e[0m"
     echo -e "\e[33m[!]Instalar y habilitar Cron si es necesario.\e[0m"
 else
-    echo -e "\e[32m[+] Cron instalado"
+    echo -e "${GREEN}[+] Cron instalado"
     counter=$((counter + 1))
 
     # Verificar el estado del servicio cron
