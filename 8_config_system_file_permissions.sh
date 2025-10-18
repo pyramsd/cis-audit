@@ -26,10 +26,10 @@ for entry in "${system_files[@]}"; do
                         echo -e "${GREEN}-> $actual_perms\n${RESET}"
                         counter=$((counter + 1))
                 else
-                        echo -e "\e[38;5;210m[-] ADVERTENCIA: Los permisos del archivo $file son $actual_perms"
+                        echo -e "${PINK}[-] ADVERTENCIA: Los permisos del archivo $file son $actual_perms"
                         echo -e "${YELLOW}[!] Pero deberían ser $expected_perms"
                 fi
         else
-                echo -e "\e[38;5;210m[-] El archivo $file no existe"
+                echo -e "${PINK}[-] El archivo $file no existe"
         fi
 done

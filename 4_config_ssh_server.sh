@@ -175,7 +175,7 @@ output=$(sshd -T | grep -Pi -- '^\h*(allow|deny)(users|groups)\h+\H+')
 exit_code=$?
 
 if [ $exit_code -ne 0 ]; then
-        echo -e "\e[38;5;210m[!] Sin configuracion de acceso${RESET}"
+        echo -e "${PINK}[!] Sin configuracion de acceso${RESET}"
         echo -e "\e[33m[!] Para corregir:\nEn /etc/ssh/sshd_config"
         echo -e "Agregar:\nAllowUsers <usuario/s>\nAllowGroups <grupo/s>"
         echo -e "DenyUsers <usuario/s>\nDenyGroups <grupo/s>${RESET}"
@@ -190,7 +190,7 @@ echo -e "${BLUE}[*] Cifrados SSH configurados${RESET}"
 output=$(sshd -T 2>&1 | grep -Pi -- '^ciphers\h+\"?([^#\n\r]+,)?((3des|blowfish|cast128|aes(128|192|256))-cbc|arcfour(128|256)?|rijndael-cbc@lysator\.liu\.se|chacha20-poly1305@openssh\.com)\b')
 exit_code=$?
 if [ $exit_code -ne 0 ]; then
-        echo -e "\e[38;5;210m[!] Cifrados no configurados${RESET}"
+        echo -e "${PINK}[!] Cifrados no configurados${RESET}"
 else
         echo -e "${GREEN}[+] Cifrados configurados:\n$output\e0m"
         counter=$((counter + 1))
@@ -214,7 +214,7 @@ for config in "${configs[@]}"; do
                                 echo -e "${GREEN}[+] $output"
                                 counter=$((counter + 1))
                         else
-                                echo -e "\e[38;5;210m[-] $output"
+                                echo -e "${PINK}[-] $output"
                         fi
                 elif [[ "$config" == "loglevel" ]]; then
                         if [[ "$value" == "INFO" || "$value" == "VERBOSE" ]]; then
@@ -225,21 +225,21 @@ for config in "${configs[@]}"; do
                         fi
                 elif [[ "$config" == "logingracetime" ]]; then
                         if [[ "$value" != "60" ]]; then
-                                echo -e "\e[38;5;210m[-] $output -> Valor recomendado: 60"
+                                echo -e "${PINK}[-] $output -> Valor recomendado: 60"
                         else
                                 echo -e "${GREEN}[+] $output"
                                 counter=$((counter + 1))
                         fi
                 elif [[ "$config" == "maxauthtries" ]]; then
                         if [[ "$value" != "4" ]]; then
-                                echo -e "\e[38;5;210m[-] $output -> Valor recomendado: 4"
+                                echo -e "${PINK}[-] $output -> Valor recomendado: 4"
                         else
                                 echo -e "${GREEN}[+] $output"
                                 counter=$((counter + 1))
                         fi
                 elif [[ "$config" == "maxstartups" ]]; then
                         if [[ "$value" != "10:30:60" ]]; then
-                                echo -e "\e[38;5;210m[-] $output -> Valor recomendado: 10:30:60"
+                                echo -e "${PINK}[-] $output -> Valor recomendado: 10:30:60"
                         else
                                 echo -e "${GREEN}[+] $output"
                                 counter=$((counter + 1))
@@ -252,20 +252,20 @@ for config in "${configs[@]}"; do
                                         echo -e "\e[33m    [!] without-password: Permite el acceso root, pero solo si usa una clave SSH"
                                 fi
                         else
-                                echo -e "\e[38;5;210mm[-] $output"
+                                echo -e "${PINK}m[-] $output"
                         fi
                 elif [[ "$config" == "clientalivecountmax" || "$config" == "clientaliveinterval" ]]; then
                         if [[ "$value" =~ ^[0-9]+$ ]]; then
                                 echo -e "${GREEN}[+] $output"
                                 counter=$((counter + 1))
                         else
-                                echo -e "\e[38;5;210m[-] $output -> El valor tiene que ser un numerico"
+                                echo -e "${PINK}[-] $output -> El valor tiene que ser un numerico"
                         fi
                 else
-                        echo -e "\e[38;5;210m[!] Valor desconocido"
+                        echo -e "${PINK}[!] Valor desconocido"
                 fi
         else
-                echo -e "\e[38;5;210m[-] No se encuentra esa configuracion"
+                echo -e "${PINK}[-] No se encuentra esa configuracion"
         fi
 done
 echo -e "\e[33m[!] Para añadir o modificar configuraciones: /etc/ssh/sshd_config"
@@ -279,9 +279,10 @@ output=$(sshd -T | grep -Pi -- 'kexalgorithms\h+([^#\n\r]+,)?(diffie-hellman-gro
 exit_code=$?
 if [[ $exit_code -ne 0 ]]; then
         echo -e "${GREEN}[+] KexAlgorithms sin cifrados debiles:\n-> $output2${RESET}"
+        counter=$((counter + 1))
 else
         if [[ $output == *"kexalgorithms no"* ]]; then
-                echo -e "\e[38;5;210m[!] KexAlgorithms no está habilitado:\n-> $output${RESET}"
+                echo -e "${PINK}[!] KexAlgorithms no está habilitado:\n-> $output${RESET}"
         else
                 echo -e "${GREEN}[+] KexAlgorithms habilitado:\n-> $output2${RESET}"
                 counter=$((counter + 1))
@@ -299,9 +300,9 @@ if [[ $exit_code -ne 0 ]]; then
         counter=$((counter + 1))
 else
         if [[ $output == *"macs no"* ]]; then
-                echo -e "\e[38;5;210m[-] Macs no está habilitado:\n-> $output${RESET}"
+                echo -e "${PINK}[-] Macs no está habilitado:\n-> $output${RESET}"
         else
-                echo -e "\e[38;5;210m[-] Macs con cifrado debil:\n-> $output${RESET}"
+                echo -e "${PINK}[-] Macs con cifrado debil:\n-> $output${RESET}"
                 echo -e "\e[33m[!] Cifrados seguros:\n* HMAC-SHA1\n* HMAC-SHA2-256\n* HMAC-SHA2-384\n* HMAC-SHA2-512"
         fi
 fi
@@ -312,10 +313,10 @@ echo -e "${BLUE}[*] sshd UsePAM activado${RESET}"
 output=$(sshd -T | grep -i usepam)
 exit_code=$?
 if [[ $exit_code -ne 0 ]]; then
-        echo -e "\e[38;5;210m[!] UsePam no habilitado:\n-> $output${RESET}"
+        echo -e "${PINK}[!] UsePam no habilitado:\n-> $output${RESET}"
 else
         if [[ $output == *"usepam no"* ]]; then
-                echo -e "\e[38;5;210m[!] UsePam desactivado:\n-> $output${RESET}"
+                echo -e "${PINK}[!] UsePam desactivado:\n-> $output${RESET}"
     else
                 echo -e "${GREEN}[+] UsePam activado:\n-> $output${RESET}"
                 counter=$((counter + 1))

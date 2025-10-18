@@ -6,7 +6,7 @@ packages=("autofs" "avahi-daemon" "bind9" "dnsmasq" "vsftpd" "ftp" "slapd" "dove
 # Iterar sobre la lista de paquetes
 for pkg in "${packages[@]}"; do
     if dpkg-query -s "$pkg" &>/dev/null; then
-        echo -e "\e[38;5;210m[-] $pkg is installed"
+        echo -e "${PINK}[-] $pkg is installed"
     else
         echo -e "${GREEN}[+] $pkg is not installed"
         counter=$((counter + 1))
@@ -55,13 +55,13 @@ fi
 
 # Resultado de la auditoría
 if [ "${#a_output2[@]}" -le 0 ]; then
-    printf "\n${GREEN} ** PASS ** ${RESET}\n"
+    printf "${GREEN} ** PASS ** ${RESET}\n"
     for line in "${a_output[@]}"; do
         printf "${GREEN}%s\n${RESET}" "$line"
         counter=$((counter + 1))
     done
 else
-    printf "\n${RED} ** FAIL ** ${RESET}\n"
+    printf "${RED} ** FAIL ** ${RESET}\n"
     printf " * Reasons for audit failure *\n"
     for line in "${a_output2[@]}"; do
         printf "${RED}%s\n${RESET}" "$line"

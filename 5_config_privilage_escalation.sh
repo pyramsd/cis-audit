@@ -3,7 +3,7 @@ if dpkg-query -s sudo &>/dev/null; then
     echo -e "${GREEN}[+] Sudo instalado\n"
     counter=$((counter + 1))
 else
-    echo -e "\e[38;5;210m[-] Sudo no instalado"
+    echo -e "${PINK}[-] Sudo no instalado"
 fi
 
 
@@ -15,7 +15,7 @@ if [[ $output1 == *"use_pty"* && $exit_code2 -ne 0 ]]; then
     echo -e "${GREEN}[+] $output1"
     counter=$((counter + 1))
 else
-    echo -e "\e[38;5;210m[-] $output1 $output2"
+    echo -e "${PINK}[-] $output1 $output2"
 fi
 
 echo -e "\n"
@@ -26,7 +26,7 @@ if [[ $output == *"logfile"* ]]; then
         echo -e "${GREEN}[+] $output"
         counter=$((counter + 1))
 else
-        echo -e "\e[38;5;210m[-] El archivo log de sudo no existe"
+        echo -e "${PINK}[-] El archivo log de sudo no existe"
         echo -e "${YELLOW}[!] Para corregir:"
         echo -e "Editar el archivo sudoers -> sudo visudo"
         echo -e 'Añadir esta linea:\nDefaults\tlogfile="/var/log/sudo.log"'
@@ -38,7 +38,7 @@ echo -e "${BLUE}[*] Garantizar que los usuarios deban proporcionar una contrase�
 output=$(sudo grep -r "^[^#].*NOPASSWD" /etc/sudoers*)
 exit_code=$?
 if [[ $exit_code -eq 0 ]]; then
-        echo -e "\e[38;5;210m[-] No todos los usuarios deben proporcionar clave\n -> $output"
+        echo -e "${PINK}[-] No todos los usuarios deben proporcionar clave\n -> $output"
 else
         echo -e "${GREEN}[+] Todos los usuarios deben proporcionar clave"
         counter=$((counter + 1))
@@ -53,7 +53,7 @@ if [[ $exit_code -eq 1 ]]; then
         echo -e "${GREEN}[+] La reautenticacion de privilegios no esta desactivada globalmente"
         counter=$((counter + 1))
 else
-        echo -e "\e[38;5;210m[-] La reautenticacion de privilegios esta desactivada globalmente\n$output"
+        echo -e "${PINK}[-] La reautenticacion de privilegios esta desactivada globalmente\n$output"
 fi
 
 echo -e "\n"
@@ -66,7 +66,7 @@ if [[ -n $output ]]; then
 else
         output=$(sudo -V | grep -i "Authentication timestamp timeout:")
         if [[ -n $output ]]; then
-                echo -e "\e[38;5;210m[!] No TimeSttamp configurado. Por defecto es 15 minutos"
+                echo -e "${PINK}[!] No TimeSttamp configurado. Por defecto es 15 minutos"
                 echo -e "${YELLOW}[!] Para corregir:"
                 echo -e "Editar el archivo sudoers -> sudo visudo"
                 echo -e 'Añadir estas lineas:\nDefaults\tenv_reset, timestamp_timeout=15'
@@ -90,7 +90,7 @@ group=$(echo "$config" | grep -oP 'group=\K\w+')
 if [[ -z "$config" ]]; then
     echo -e "${RED}[-] La configuración de su no está restringida (pam_wheel.so no configurado)${RESET}"
 elif [[ -z "$group" ]]; then
-    echo -e "\e[38;5;210m[-] pam_wheel.so configurado, pero no se especificó ningún grupo${RESET}"
+    echo -e "${PINK}[-] pam_wheel.so configurado, pero no se especificó ningún grupo${RESET}"
 else
     # Verificar si el grupo está vacío
     users=$(grep "^$group:" /etc/group | cut -d: -f4)
@@ -98,7 +98,7 @@ else
         echo -e "${GREEN}[+] Configuración correcta: su está restringido al grupo '$group' y el grupo está vacío${RESET}"
         counter=$((counter + 1))
     else
-        echo -e "\e[38;5;210m[-] El grupo '$group' tiene usuarios: $users${RESET}"
+        echo -e "${PINK}[-] El grupo '$group' tiene usuarios: $users${RESET}"
     fi
 fi
 

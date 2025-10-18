@@ -39,7 +39,7 @@ if [ ${#a_passwd_group_diff[@]} -eq 0 ]; then
         echo -e "${GREEN}[+] Todos los grupos de /etc/passwd existen en /etc/group"
         counter=$((counter + 1))
 else
-        echo -e "\e[38;5;210m[!] Algunos GIDs de /etc/passwd no existen en /etc/group:"
+        echo -e "${PINK}[!] Algunos GIDs de /etc/passwd no existen en /etc/group:"
         echo ${a_passwd_group_diff[@]}
         for l_gid in "${a_passwd_group_diff[@]}"; do
                 awk -F: -v gid="$l_gid" '

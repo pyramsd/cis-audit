@@ -1,5 +1,10 @@
 #!/usr/bin/bash
 
+if [ "$(id -u)" -ne 0 ]; then
+    echo "Permiso denegado $0" >&2
+    exit 1
+fi
+
 source "$(dirname "$0")/constantes/Colores.sh"
 source "$(dirname "$0")/vars/counter.sh"
 

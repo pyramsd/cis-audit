@@ -77,7 +77,7 @@ if [ -z "$l_output2" ]; then
   echo -e "${GREEN}- Audit Result:\n *** PASS ***\n - Root's path is correctly configured${RESET}"
   counter=$((counter + 1))
 else
-  echo -e "\e[38;5;210m- Audit Result:\n ** FAIL **\n - * Reasons for audit failure * :\n$l_output2${RESET}"
+  echo -e "${PINK}- Audit Result:\n ** FAIL **\n - * Reasons for audit failure * :\n$l_output2${RESET}"
 fi
 
 echo -e "\n"
@@ -90,7 +90,7 @@ if [[ $exit_code -ne 0 ]]; then
         echo -e "${GREEN}[+] Usuario root umask correctamente configurado"
         counter=$((counter + 1))
 else
-        ecjo -e "\e[38;5;210m[-] Usuario root umask incorrectamente configurado\n -> $output"
+        ecjo -e "${PINK}[-] Usuario root umask incorrectamente configurado\n -> $output"
 fi
 
 echo -e "\n"
@@ -116,7 +116,7 @@ if [[ -z "$result" ]]; then
         echo -e "${GREEN}[+] Servicios del sistema sin shell valido${RESET}"
         counter=$((counter + 1))
 else
-        echo -e "\e[38;5;210m[!]Servicios del sistema con shell valido:${RESET}"
+        echo -e "${PINK}[!]Servicios del sistema con shell valido:${RESET}"
         echo "$result"
 fi
 
@@ -153,6 +153,6 @@ if [ -z "$output" ]; then
   counter=$((counter + 1))
 else
   # Si hay resultados, la auditoría falló
-  echo -e "\e[38;5;210mAudit failed: Issues detected.${RESET}"
+  echo -e "${PINK}Audit failed: Issues detected.${RESET}"
   echo "$output"
 fi
