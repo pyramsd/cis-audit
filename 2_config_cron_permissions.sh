@@ -1,5 +1,3 @@
-#!/bin/bash
-
 # Definir archivos de cron y sus permisos esperados
 declare -A cron_paths=(
     ["/etc/crontab"]="600:root:root"
@@ -13,6 +11,7 @@ declare -A cron_paths=(
 echo -e "${BLUE}[*] Permisos de los archivos del servicio Cron${RESET}"
 if ! dpkg -s cron &>/dev/null; then
     echo -e "${PINK}[!] Cron no está instalado en el sistema.${RESET}"
+    echo "[SOFTWARE] Cron no instalado" >> "$LOG_FILE"
     echo -e "\e[33m[!]Instalar y habilitar Cron si es necesario.${RESET}"
 else
     echo -e "${GREEN}[+] Cron instalado"
@@ -43,6 +42,7 @@ else
             counter=$((counter + 1))
         else
             echo -e "${PINK}[-] $actual_permissions \e[33m-> $expected_permissions${RESET}\n"
+            echo -e "[FILE_PERMISSION] Cron: Permisos del archivo $file incorrectos" >> "$LOG_FILE"
         fi
     done
 

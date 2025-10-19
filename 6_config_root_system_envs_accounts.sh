@@ -14,6 +14,7 @@ for check in "${checks[@]}"; do
     counter=$((counter + 1))
   else
     echo -e "${RED}[-] $label inesperado: $output${RESET}"
+    echo "[ROOT_ACCOUNT] ROOT: el $label: $output" >> "$LOG_FILE"
   fi
 done
 echo -e "\n"
@@ -26,6 +27,7 @@ if [[ "$output" == "$expected" ]]; then
     counter=$((counter + 1))
 else
     echo -e "${RED}[-] $label inesperado: $output${RESET}"
+    echo "[ROOT_ACCOUNT] ROOT: el $label: $output" >> "$LOG_FILE"
 fi
 
 echo -e "\n"
@@ -91,6 +93,7 @@ if [[ $exit_code -ne 0 ]]; then
         counter=$((counter + 1))
 else
         ecjo -e "${PINK}[-] Usuario root umask incorrectamente configurado\n -> $output"
+        echo "[ROOT_ACCOUNT] UMASK: Mal configurado" >> "$LOG_FILE"
 fi
 
 echo -e "\n"
@@ -118,6 +121,7 @@ if [[ -z "$result" ]]; then
 else
         echo -e "${PINK}[!]Servicios del sistema con shell valido:${RESET}"
         echo "$result"
+        echo "[ROOT_ACCOUNT] ROOT: $result" >> "$LOG_FILE"
 fi
 
 echo -e "\n"
@@ -155,4 +159,5 @@ else
   # Si hay resultados, la auditoría falló
   echo -e "${PINK}Audit failed: Issues detected.${RESET}"
   echo "$output"
+  echo "[ROOT_ACCOUNT] ROOT: Las cuentas sin login no estan bloqueadas" >> "$LOG_FILE"
 fi

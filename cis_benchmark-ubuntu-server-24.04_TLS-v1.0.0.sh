@@ -5,6 +5,48 @@ if [ "$(id -u)" -ne 0 ]; then
     exit 1
 fi
 
+LOG_DIR="$(dirname "$0")/logs"
+mkdir -p "$LOG_DIR"
+ERROR_LOG="$LOG_DIR/errors.log"
+: > "$ERROR_LOG"
+
+# Redirigir todos los errores de los scripts fuente a errors.log
+exec 2> >(tee -a "$ERROR_LOG" >&2)
+
+print_help() {
+    cat <<'EOF'
+Usage: ./cis_benchmark-ubuntu-server-24.04_TLS-v1.0.0.sh [OPCIONES]
+
+Opciones:
+  -h, --help         Muestra esta ayuda.
+  --solutions        Soluciones de configuración.
+EOF
+}
+
+PARSED=$(getopt -o h --long help -- "$@")
+if [ $? -ne 0 ]; then
+    exit 2
+fi
+eval set -- "$PARSED"
+
+while true; do
+    case "$1" in
+        (-h|--help)
+            print_help
+            exit 0
+            ;;
+        (--)
+            shift   # quitar el separador "--"
+            break   # salir del bucle de opciones
+            ;;
+        (*)
+            # no debería ocurrir
+            echo "Opción desconocida: $1" >&2
+            exit 3
+            ;;
+    esac
+done
+
 source "$(dirname "$0")/constantes/Colores.sh"
 source "$(dirname "$0")/vars/counter.sh"
 

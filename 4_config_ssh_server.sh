@@ -29,6 +29,7 @@ check_file() {
 
     if [[ "$perm" != "$expected_perm" || "$owner" != "root" || "$group" != "root" ]]; then
         echo -e "${RED}[-] ${perm}:${owner}:${group} ${ORANGE}-> ${expected_perm}:root:root${RESET}"
+        echo "[FILE_PERMISSION] SSH: Permisos del archivo $1 incorrectos" >> "$LOG_FILE"
     else
         echo -e "${GREEN}[+] ${perm}:${owner}:${group}${RESET}"
         counter=$((counter + 1))
@@ -51,6 +52,7 @@ if [ $exit_code -ne 0 ]; then
         echo -e "\e[33m[!] Para corregir:\nEn /etc/ssh/sshd_config"
         echo -e "Agregar:\nAllowUsers <usuario/s>\nAllowGroups <grupo/s>"
         echo -e "DenyUsers <usuario/s>\nDenyGroups <grupo/s>${RESET}"
+        echo "[CONFIG] SSH: Permisos de accesos no configurados" >> "$LOG_FILE"
 else
         echo -e "${GREEN}[+] Configuracion de acceso\n$output${RESET}"
         counter=$((counter + 1))
@@ -63,6 +65,7 @@ output=$(sshd -T 2>&1 | grep -Pi -- '^ciphers\h+\"?([^#\n\r]+,)?((3des|blowfish|
 exit_code=$?
 if [ $exit_code -ne 0 ]; then
         echo -e "${PINK}[!] Cifrados no configurados${RESET}"
+        echo "[CONFIG] SSH: Cifrados no configurados" >> "$LOG_FILE"
 else
         echo -e "${GREEN}[+] Cifrados configurados:\n$output\e0m"
         counter=$((counter + 1))
@@ -87,6 +90,7 @@ for config in "${configs[@]}"; do
                                 counter=$((counter + 1))
                         else
                                 echo -e "${PINK}[-] $output"
+                                echo "[CONFIG] SSH: $output no configurado" >> "$LOG_FILE"
                         fi
                 elif [[ "$config" == "loglevel" ]]; then
                         if [[ "$value" == "INFO" || "$value" == "VERBOSE" ]]; then
@@ -94,10 +98,12 @@ for config in "${configs[@]}"; do
                                 counter=$((counter + 1))
                         else
                                 echo -e "\e[37;5;210mm[-] $output"
+                                echo "[CONFIG] SSH: $output no configurado" >> "$LOG_FILE"
                         fi
                 elif [[ "$config" == "logingracetime" ]]; then
                         if [[ "$value" != "60" ]]; then
                                 echo -e "${PINK}[-] $output -> Valor recomendado: 60"
+                                echo "[CONFIG] SSH: $output no configurado" >> "$LOG_FILE"
                         else
                                 echo -e "${GREEN}[+] $output"
                                 counter=$((counter + 1))
@@ -105,6 +111,7 @@ for config in "${configs[@]}"; do
                 elif [[ "$config" == "maxauthtries" ]]; then
                         if [[ "$value" != "4" ]]; then
                                 echo -e "${PINK}[-] $output -> Valor recomendado: 4"
+                                echo "[CONFIG] SSH: $output no configurado" >> "$LOG_FILE"
                         else
                                 echo -e "${GREEN}[+] $output"
                                 counter=$((counter + 1))
@@ -112,6 +119,7 @@ for config in "${configs[@]}"; do
                 elif [[ "$config" == "maxstartups" ]]; then
                         if [[ "$value" != "10:30:60" ]]; then
                                 echo -e "${PINK}[-] $output -> Valor recomendado: 10:30:60"
+                                echo "[CONFIG] SSH: $output no configurado" >> "$LOG_FILE"
                         else
                                 echo -e "${GREEN}[+] $output"
                                 counter=$((counter + 1))
@@ -125,6 +133,7 @@ for config in "${configs[@]}"; do
                                 fi
                         else
                                 echo -e "${PINK}m[-] $output"
+                                echo "[CONFIG] SSH: $output no configurado" >> "$LOG_FILE"
                         fi
                 elif [[ "$config" == "clientalivecountmax" || "$config" == "clientaliveinterval" ]]; then
                         if [[ "$value" =~ ^[0-9]+$ ]]; then
@@ -132,6 +141,7 @@ for config in "${configs[@]}"; do
                                 counter=$((counter + 1))
                         else
                                 echo -e "${PINK}[-] $output -> El valor tiene que ser un numerico"
+                                echo "[CONFIG] SSH: $output no configurado" >> "$LOG_FILE"
                         fi
                 else
                         echo -e "${PINK}[!] Valor desconocido"
@@ -155,6 +165,7 @@ if [[ $exit_code -ne 0 ]]; then
 else
         if [[ $output == *"kexalgorithms no"* ]]; then
                 echo -e "${PINK}[!] KexAlgorithms no está habilitado:\n-> $output${RESET}"
+                echo "[CONFIG] SSH: $output no configurado" >> "$LOG_FILE"
         else
                 echo -e "${GREEN}[+] KexAlgorithms habilitado:\n-> $output2${RESET}"
                 counter=$((counter + 1))
@@ -173,9 +184,11 @@ if [[ $exit_code -ne 0 ]]; then
 else
         if [[ $output == *"macs no"* ]]; then
                 echo -e "${PINK}[-] Macs no está habilitado:\n-> $output${RESET}"
+                echo "[CONFIG] SSH: $output no configurado" >> "$LOG_FILE"
         else
                 echo -e "${PINK}[-] Macs con cifrado debil:\n-> $output${RESET}"
                 echo -e "\e[33m[!] Cifrados seguros:\n* HMAC-SHA1\n* HMAC-SHA2-256\n* HMAC-SHA2-384\n* HMAC-SHA2-512"
+                echo "[CONFIG] SSH: MACS con cifrados debiles" >> "$LOG_FILE"
         fi
 fi
 
@@ -186,9 +199,11 @@ output=$(sshd -T | grep -i usepam)
 exit_code=$?
 if [[ $exit_code -ne 0 ]]; then
         echo -e "${PINK}[!] UsePam no habilitado:\n-> $output${RESET}"
+        echo "[CONFIG] SSH: $output no habilitado" >> "$LOG_FILE"
 else
         if [[ $output == *"usepam no"* ]]; then
                 echo -e "${PINK}[!] UsePam desactivado:\n-> $output${RESET}"
+                echo "[CONFIG] SSH: $output desactivado" >> "$LOG_FILE"
     else
                 echo -e "${GREEN}[+] UsePam activado:\n-> $output${RESET}"
                 counter=$((counter + 1))

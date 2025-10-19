@@ -120,10 +120,12 @@ if [ ${#active_firewall[@]} -eq 1 ]; then
 elif [ ${#active_firewall[@]} -eq 0 ]; then
     echo -e "\n${RED}[-] Ningún firewall en uso."
     echo -e "${PINK}[!] Activar un firewall mejora la seguridad del sistema.${RESET}"
+    echo "[FIREWALL] Ningun firewall activado" >> "$LOG_FILE"
 else
     echo -e "\n${RED}[-] Múltiples firewalls en uso: ${active_firewall[*]}\n"
     echo -e "\e[33m[!] Tiene que estar funcionando UN solo firewall.${RESET}"
     echo -e "\e[33m[!] En caso de tener varios firewalls instalados, escoja solo UNO${RESET}"
+    echo "[FIREWALL] Multiples firewalls en uso" >> "$LOG_FILE"
 fi
 
 if [[ $installed_firewalls -gt 1 ]]; then

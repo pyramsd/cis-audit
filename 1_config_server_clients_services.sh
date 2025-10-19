@@ -1,3 +1,8 @@
+LOG_DIR="$(dirname "$0")/logs"
+mkdir -p "$LOG_DIR"
+LOG_FILE="$LOG_DIR/errors.log"
+: > "$LOG_FILE"
+
 # Software que no deben estar instalados a primera instancia
 echo -e "${BLUE}[*] Estos softwares no deben de estar instalados a no ser que sean necesarios:${RESET}"
 # Lista de paquetes a verificar
@@ -7,6 +12,7 @@ packages=("autofs" "avahi-daemon" "bind9" "dnsmasq" "vsftpd" "ftp" "slapd" "dove
 for pkg in "${packages[@]}"; do
     if dpkg-query -s "$pkg" &>/dev/null; then
         echo -e "${PINK}[-] $pkg is installed"
+        echo "[SOFTWARE] El programa $pkg no deb estar instalado" >> "$LOG_FILE"
     else
         echo -e "${GREEN}[+] $pkg is not installed"
         counter=$((counter + 1))
