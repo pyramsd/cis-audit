@@ -1,174 +1,46 @@
-echo -e "${BLUE}[*] Permisos de /etc/ssh/sshd_config configurados adecuadamente${RESET}"
-# Definición de variables
-a_output=()
-a_output2=()
-perm_mask='0177'
-maxperm="$(printf '%o' $((0777 & ~$perm_mask)))"
+echo -e "${BLUE}[*] Revisión de permisos de archivos SSH${RESET}"
 
-# Función para verificar archivos de configuración SSH
-f_sshd_files_chk() {
-    while IFS=: read -r l_mode l_user l_group; do
-        a_out2=()
+# Buscar archivos relevantes en /etc/ssh/
+ssh_files=()
+while IFS= read -r -d $'\0' file; do
+    ssh_files+=("$file")
+done < <(find /etc/ssh -maxdepth 1 -type f \( -name "sshd_config" -o -name "*_key" -o -name "*_key.pub" \) -print0 2>/dev/null)
 
-        # Verificar permisos
-        [ $(( $l_mode & $perm_mask )) -gt 0 ] && a_out2+=(" Is mode: \"$l_mode\"" " Should be mode: \"$maxperm\" or more restrictive")
-
-        # Verificar propietario
-        [ "$l_user" != "root" ] && a_out2+=(" Is owned by \"$l_user\" should be owned by \"root\"")
-
-        # Verificar grupo propietario
-        [ "$l_group" != "root" ] && a_out2+=(" Is group owned by \"$l_user\" should be group owned by \"root\"")
-
-        # Si hay errores, agregar a a_output2, de lo contrario, agregar a a_output
-        if [ "${#a_out2[@]}" -gt "0" ]; then
-            a_output2+=(" - File: \"$l_file\":" "${a_out2[@]}")
-        else
-            a_output+=(" - File: \"$l_file\":" " Correct: mode ($l_mode), owner ($l_user)" " and group owner ($l_group) configured")
-        fi
-    done < <(stat -Lc '%#a:%U:%G' "$l_file")
+# Función para determinar el permiso esperado
+get_expected_perm() {
+    local file="$1"
+    case "$file" in
+        *sshd_config) echo "600" ;;  # Archivo de configuración
+        *.key) echo "600" ;;          # Claves privadas
+        *.pub) echo "600" ;;          # Claves públicas
+        *) echo "600" ;;
+    esac
 }
 
-# Verificar el archivo principal de configuración SSH
-if [ -e "/etc/ssh/sshd_config" ]; then
-    l_file="/etc/ssh/sshd_config"
-    f_sshd_files_chk
-fi
+# Función para verificar archivo
+check_file() {
+    local file="$1"
+    [ ! -e "$file" ] && return
 
-# Verificar archivos de configuración adicionales
-while IFS= read -r -d $'\0' l_file; do
-    [ -e "$l_file" ] && f_sshd_files_chk
-done < <(find /etc/ssh/sshd_config.d -type f -name '*.conf' \( -perm /077 -o ! -user root -o ! -group root \) -print0 2>/dev/null)
+    read -r perm owner group < <(stat -Lc '%a %U %G' "$file")
+    expected_perm=$(get_expected_perm "$file")
 
-# Generar salida dependiendo de si se encontraron errores
-if [ "${#a_output2[@]}" -le 0 ]; then
-        printf ${GREEN}'%s\n'${RESET} "- Audit Result:" " ** PASS **" "${a_output[@]}" ""
+    echo "Permisos de $file:"
+
+    if [[ "$perm" != "$expected_perm" || "$owner" != "root" || "$group" != "root" ]]; then
+        echo -e "${RED}[-] ${perm}:${owner}:${group} ${ORANGE}-> ${expected_perm}:root:root${RESET}"
+    else
+        echo -e "${GREEN}[+] ${perm}:${owner}:${group}${RESET}"
         counter=$((counter + 1))
-else
-        printf ${RED}'%s\n'${RESET} "- Audit Result:" " ** FAIL **" " - Reason(s) for audit failure:" "${a_output2[@]}"
-    [ "${#a_output[@]}" -gt 0 ] && printf '%s\n' "" "- Correctly set:" "${a_output[@]}" ""
-fi
-
-echo -e "\n"
-
-echo -e "${BLUE}[*] Permisos de los archivos de claves de host privadas SSH configuradas${RESET}"
-# Declaración de variables
-a_output=()
-a_output2=()
-l_ssh_group_name="$(awk -F: '($1 ~ /^(ssh_keys|_?ssh)$/) {print $1}' /etc/group)"
-
-# Función para verificar propiedades de un archivo
-f_file_chk() {
-    while IFS=: read -r l_file_mode l_file_owner l_file_group; do
-        a_out2=()
-        [ "$l_file_group" = "$l_ssh_group_name" ] && l_pmask="0137" || l_pmask="0177"
-        l_maxperm="$(printf '%o' $((0777 & ~$l_pmask)))"
-
-        # Verificar permisos del archivo
-        if [ $((l_file_mode & l_pmask)) -gt 0 ]; then
-            a_out2+=(" Mode: \"$l_file_mode\" should be mode: \"$l_maxperm\" or more restrictive")
-        fi
-
-        # Verificar propietario del archivo
-        if [ "$l_file_owner" != "root" ]; then
-            a_out2+=(" Owned by: \"$l_file_owner\" should be owned by \"root\"")
-        fi
-
-        # Verificar grupo propietario del archivo
-        if [[ ! "$l_file_group" =~ ($l_ssh_group_name|root) ]]; then
-            a_out2+=(" Owned by group \"$l_file_group\" should be group owned by: \"$l_ssh_group_name\" or \"root\"")
-        fi
-
-        # Agregar resultados al reporte final
-        if [ "${#a_out2[@]}" -gt 0 ]; then
-            a_output2+=(" - File: \"$l_file\"${a_out2[@]}")
-        else
-            a_output+=(" - File: \"$l_file\"" \
-                " Correct: mode: \"$l_file_mode\", owner: \"$l_file_owner\" and group owner: \"$l_file_group\" configured")
-        fi
-    done < <(stat -Lc '%#a:%U:%G' "$l_file")
+    fi
+    echo
 }
 
-# Buscar y analizar archivos
-while IFS= read -r -d $'\0' l_file; do
-    if ssh-keygen -lf &>/dev/null "$l_file"; then
-        if file "$l_file" | grep -Piq -- '\bopenssh\h+([^#\n\r]+\h+)?private\h+key\b'; then
-            f_file_chk
-        fi
-    fi
-done < <(find -L /etc/ssh -xdev -type f -print0 2>/dev/null)
+# Iterar sobre los archivos encontrados
+for file in "${ssh_files[@]}"; do
+    check_file "$file"
+done
 
-# Generar salida dependiendo de si se encontraron errores
-if [ "${#a_output2[@]}" -le 0 ]; then
-    printf ${GREEN}'%s\n'${RESET} "- Audit Result:" " ** PASS **" "${a_output[@]}"
-    counter=$((counter + 1))
-else
-    printf ${RED}'%s\n'${RESET} "- Audit Result:" " ** FAIL **" " - Reason(s) for audit failure:" "${a_output2[@]}"
-    [ "${#a_output[@]}" -gt 0 ] && printf '%s\n' "" "- Correctly set:" "${a_output[@]}"
-fi
-
-echo -e "\n"
-
-echo -e "${BLUE}[*] Permisos de los archivos de claves de host publicas SSH configuradas${RESET}"
-# Declaración de variables
-a_output=()
-a_output2=()
-l_ssh_group_name="$(awk -F: '($1 ~ /^(ssh_keys|_?ssh)$/) {print $1}' /etc/group)"
-
-# Función para verificar propiedades de un archivo
-f_file_chk() {
-    while IFS=: read -r l_file_mode l_file_owner l_file_group; do
-        a_out2=()
-        [ "$l_file_group" = "$l_ssh_group_name" ] && l_pmask="0137" || l_pmask="0177"
-        l_maxperm="$(printf '%o' $((0777 & ~$l_pmask)))"
-
-        # Verificar permisos del archivo
-        if [ $((l_file_mode & l_pmask)) -gt 0 ]; then
-            a_out2+=(" Mode: \"$l_file_mode\". Should be mode: \"$l_maxperm\" or more restrictive")
-        fi
-
-        # Verificar propietario del archivo
-        if [ "$l_file_owner" != "root" ]; then
-            a_out2+=(" Owned by: \"$l_file_owner\" Should be owned by \"root\"")
-        fi
-
-        # Verificar grupo propietario del archivo
-        if [[ ! "$l_file_group" =~ ($l_ssh_group_name|root) ]]; then
-            a_out2+=(" Owned by group \"$l_file_group\" Should be group owned by: \"$l_ssh_group_name\" or \"root\"")
-        fi
-
-        # Agregar resultados al reporte final
-        if [ "${#a_out2[@]}" -gt 0 ]; then
-                a_output2+=(" - File: \"$l_file\"")
-                for msg in "${a_out2[@]}"; do
-                        a_output2+=("$msg")
-                done
-            #a_output2+=(" - File: \"$l_file\":" "${a_out2[@]}")
-        else
-            a_output+=(" - File: \"$l_file\"" \
-                " Correct: mode: \"$l_file_mode\", owner: \"$l_file_owner\" and group owner: \"$l_file_group\" configured")
-        fi
-    done < <(stat -Lc '%#a:%U:%G' "$l_file")
-}
-
-# Buscar y analizar archivos
-while IFS= read -r -d $'\0' l_file; do
-    if ssh-keygen -lf &>/dev/null "$l_file"; then
-        if file "$l_file" | grep -Piq -- '\bopenssh\h+([^#\n\r]+\h+)?public\h+key\b'; then
-            f_file_chk
-        fi
-    fi
-done < <(find -L /etc/ssh -xdev -type f -print0 2>/dev/null)
-
-# Generar salida dependiendo de si se encontraron errores
-if [ "${#a_output2[@]}" -le 0 ]; then
-    printf ${GREEN}'%s\n'${RESET} "- Audit Result:" " ** PASS **" "${a_output[@]}" ""
-    counter=$((counter + 1))
-else
-    printf ${RED}'%s\n'${RESET} "- Audit Result:" " ** FAIL **" " - Reason(s) for audit failure:" "${a_output2[@]}"
-    [ "${#a_output[@]}" -gt 0 ] && printf '%s\n' "" "- Correctly set:" "${a_output[@]}" ""
-fi
-
-echo -e "\n"
 
 echo -e "${BLUE}[*] Permisos de acceso SSH${RESET}"
 output=$(sshd -T | grep -Pi -- '^\h*(allow|deny)(users|groups)\h+\H+')

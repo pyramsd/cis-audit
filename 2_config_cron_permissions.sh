@@ -23,12 +23,12 @@ else
     cron_activated=$(systemctl is-active cron)
 
     [[ $cron_enabled == "enabled" ]] && {
-        echo -e "\e[32m[+] Cron: $cron_enabled${RESET}"
+        echo -e "${GREEN}[+] Cron: $cron_enabled${RESET}"
         counter=$((counter + 1))
     } || echo -e "${PINK}[!] Cron: $cron_enabled${RESET}"
     
     [[ $cron_activated == "active" ]] && {
-        echo -e "\e[32m[+] Cron: $cron_activated${RESET}\n"
+        echo -e "${GREEN}[+] Cron: $cron_activated${RESET}\n"
         counter=$((counter + 1))
     } || echo -e "${PINK}[!] Cron: $cron_activated${RESET}\n"
 
@@ -39,7 +39,7 @@ else
 
         echo "Permisos de $file:"
         if [[ "$actual_permissions" == "$expected_permissions" ]]; then
-            echo -e "\e[32m[+] $actual_permissions${RESET}\n"
+            echo -e "${GREEN}[+] $actual_permissions${RESET}\n"
             counter=$((counter + 1))
         else
             echo -e "${PINK}[-] $actual_permissions \e[33m-> $expected_permissions${RESET}\n"
