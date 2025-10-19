@@ -28,8 +28,10 @@ for entry in "${system_files[@]}"; do
                 else
                         echo -e "${PINK}[-] ADVERTENCIA: Los permisos del archivo $file son $actual_perms"
                         echo -e "${YELLOW}[!] Pero deberían ser $expected_perms"
+                        echo -e "[FILE_PERMISSION] File_System: Permisos del archivo $file incorrectos" >> "$LOG_FILE"
                 fi
         else
-                echo -e "${PINK}[-] El archivo $file no existe"
+                echo -e "${RED}[-] El archivo $file no existe${RESET}"
+                echo -e "[FILE] File_System: El archivo $file no existe" >> "$LOG_FILE"
         fi
 done

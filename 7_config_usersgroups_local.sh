@@ -6,6 +6,7 @@ if [[ $exit_code -eq 0 ]]; then
         counter=$((counter + 1))
 else
         echo -e "${RED}[-] Las cuentas no usan clave secreta:\n-> $output${RESET}"
+        echo "[PASSWD] Las cuentas no usan clave secreta" >> "$LOG_FILE"
 fi
 
 echo -e "\n"
@@ -18,6 +19,7 @@ if [[ $exit_code -eq 0 ]]; then
         counter=$((counter + 1))
 else
         echo -e "${RED}[-] Campos de /etc/shadow password vacios:\n-> $output${RESET}"
+        echo "[SHADOW] Campos de /etc/shadow password vacios" >> "$LOG_FILE"
 fi
 
 echo -e "\n"
@@ -48,6 +50,7 @@ else
                         }
                 ' /etc/passwd
         done
+        echo "[GROUP] Algunos GIDs de /etc/passwd no existen en /etc/group" >> "$LOG_FILE"
 fi
 
 # Limpiar variables
@@ -66,7 +69,8 @@ if [[ $exit_code1 -eq 0 && $exit_code2 -eq 0 ]]; then
         echo -e "${GREEN}[+] Grupo shadow vacio"
         counter=$((counter + 1))
 else
-        echo -e "${RED}[-] Grupo shadow no vacia\n-> $output1\n-> $output2"
+        echo -e "${RED}[-] Grupo shadow no vacio\n-> $output1\n-> $output2"
+        echo "[GROUP_SHADOW] Grupo shadow no vacio" >> "$LOG_FILE"
 fi
 
 echo -e "\n"
@@ -95,6 +99,7 @@ echo -e "${BLUE}[*] UIDs duplicados no existente${RESET}"
     else
         # Si hubo duplicados, mostrar mensaje adicional en rojo
         echo -e "${RED}[-] Some duplicate UIDs were found in /etc/passwd${RESET}"
+        echo "[DUPLICATE_UIDs] Existen UIDs duplicados" >> "$LOG_FILE"
     fi
 }
 
@@ -124,6 +129,7 @@ echo -e "${BLUE}[*] GIDs duplicados no existente${RESET}"
     else
         # Si hubo duplicados, mostrar mensaje adicional en rojo
         echo -e "${RED}[-] Some duplicate GIDs were found in /etc/group${RESET}"
+        echo "[DUPLICATE_GUIDs] Existen GUIDs duplicados" >> "$LOG_FILE"
     fi
 }
 
@@ -153,6 +159,7 @@ echo -e "${BLUE}[*] Usuarios duplicados no existente${RESET}"
     else
         # Si hubo duplicados, mostrar mensaje adicional en rojo
         echo -e "${RED}[-] Some duplicate names were found in /etc/passwd${RESET}"
+        echo "[DUPLICATE_NAMES] Existen nombres duplicados" >> "$LOG_FILE"
     fi
 }
 
@@ -182,5 +189,6 @@ echo -e "${BLUE}[*] Grupos duplicado no existente${RESET}"
     else
         # Si hubo duplicados, mostrar mensaje adicional en rojo
         echo -e "${RED}[-] Some duplicate groups were found in /etc/group${RESET}"
+        echo "[DUPLICATE_GROUPS] Existen grupos duplicados" >> "$LOG_FILE"
     fi
 }
