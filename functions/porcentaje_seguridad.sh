@@ -1,5 +1,3 @@
-counter=0
-
 calcular_porcentaje() {
     local parte=$1
     local total=79

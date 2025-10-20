@@ -15,15 +15,15 @@ exec 2> >(tee -a "$ERROR_LOG" >&2)
 
 print_help() {
     cat <<'EOF'
-Usage: ./cis_benchmark-ubuntu-server-24.04_TLS-v1.0.0.sh [OPCIONES]
+Usage: ./cis_benchmark-ubuntu-server-24.04_TLS-v1.0.0.sh [-h | --help] [--allowed-programs=<path>]
 
 Opciones:
-  -h, --help         Muestra esta ayuda.
-  --solutions        Soluciones de configuración.
+  -h, --help                Muestra esta ayuda.
+  --allowed-programs        Lee archivo de programas permitidos.
 EOF
 }
 
-PARSED=$(getopt -o h --long help -- "$@")
+PARSED=$(getopt -o h --long help,allowed-programs: -- "$@")
 if [ $? -ne 0 ]; then
     exit 2
 fi
@@ -34,6 +34,10 @@ while true; do
         (-h|--help)
             print_help
             exit 0
+            ;;
+        (--allowed-programs)
+            ALLOWED_PROGRAMS_FILE="$2"
+            shift 2
             ;;
         (--)
             shift   # quitar el separador "--"
@@ -48,7 +52,7 @@ while true; do
 done
 
 source "$(dirname "$0")/constantes/Colores.sh"
-source "$(dirname "$0")/vars/counter.sh"
+source "$(dirname "$0")/functions/porcentaje_seguridad.sh"
 
 # Services - Configure Server and Clients Services
 source 1_config_server_clients_services.sh

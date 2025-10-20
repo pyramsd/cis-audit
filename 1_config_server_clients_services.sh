@@ -1,3 +1,5 @@
+source "$(dirname "$0")/functions/allowed_programs.sh"
+
 LOG_DIR="$(dirname "$0")/logs"
 mkdir -p "$LOG_DIR"
 LOG_FILE="$LOG_DIR/errors.log"
@@ -5,14 +7,19 @@ LOG_FILE="$LOG_DIR/errors.log"
 
 # Software que no deben estar instalados a primera instancia
 echo -e "${BLUE}[*] Estos softwares no deben de estar instalados a no ser que sean necesarios:${RESET}"
-# Lista de paquetes a verificar
+
 packages=("autofs" "avahi-daemon" "bind9" "dnsmasq" "vsftpd" "ftp" "slapd" "dovecot-imapd" "nfs-kernel-server" "ypserv" "cups" "rpcbind" "rsync" "samba" "snmpd" "tftpd-hpa" "squid" "apache2" "nginx" "xinetd" "xserver-common" "isc-dhcp-server" "nis" "rsh-client" "talk" "telnet" "inetutils-telnet" "ldap-utils" "tnftp")
 
 # Iterar sobre la lista de paquetes
 for pkg in "${packages[@]}"; do
     if dpkg-query -s "$pkg" &>/dev/null; then
-        echo -e "${PINK}[-] $pkg is installed"
-        echo "[SOFTWARE] El programa $pkg no deb estar instalado" >> "$LOG_FILE"
+        if [[ " ${allowed_programs[*]} " =~ " ${pkg} " ]]; then
+            echo -e "${GREEN}[+] $pkg está instalado pero está permitido${RESET}"
+            counter=$((counter + 1))
+        else
+            echo -e "${PINK}[-] $pkg is installed${RESET}"
+            echo "[SOFTWARE] El programa $pkg no debe estar instalado" >> "$LOG_FILE"
+        fi
     else
         echo -e "${GREEN}[+] $pkg is not installed"
         counter=$((counter + 1))
