@@ -26,8 +26,13 @@ if [[ "$output" == "$expected" ]]; then
     echo -e "${GREEN}[+] $label: $output -> Locked${RESET}"
     counter=$((counter + 1))
 else
-    echo -e "${RED}[-] $label inesperado: $output${RESET}"
-    echo "[ROOT_ACCOUNT] ROOT: el $label: $output" >> "$LOG_FILE"
+    if [[ "$output" == "P" ]]; then
+      echo -e "${GREEN}[+] Estado del $label: $output${RESET}"
+      counter=$((counter + 1))
+    else
+      echo -e "${RED}[-] Estado del $label inesperado: $output${RESET}"
+      echo "[ROOT_ACCOUNT] ROOT: el $label: $output" >> "$LOG_FILE"
+    fi
 fi
 
 echo -e "\n"

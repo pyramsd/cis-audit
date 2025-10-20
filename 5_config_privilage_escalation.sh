@@ -38,7 +38,7 @@ fi
 echo -e "\n"
 
 echo -e "${BLUE}[*] Garantizar que los usuarios deban proporcionar una contraseña para la elevación de privilegios${RESET}"
-output=$(sudo grep -r "^[^#].*NOPASSWD" /etc/sudoers*)
+output=$(grep -r "^[^#].*NOPASSWD" /etc/sudoers*)
 exit_code=$?
 if [[ $exit_code -eq 0 ]]; then
         echo -e "${PINK}[-] No todos los usuarios proporcionan clave\n -> $output"
@@ -51,7 +51,7 @@ fi
 echo -e "\n"
 
 echo -e "${BLUE}[*] La reautenticación para la escalada de privilegios no está desactivada globalmente${RESET}"
-output=$(sudo grep -r "^[^#].*\!authenticate" /etc/sudoers*)
+output=$(grep -r "^[^#].*\!authenticate" /etc/sudoers*)
 exit_code=$?
 if [[ $exit_code -eq 1 ]]; then
         echo -e "${GREEN}[+] La reautenticacion de privilegios no esta desactivada globalmente"
