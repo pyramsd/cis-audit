@@ -81,10 +81,10 @@ done
 
 # Mostrar resultados de la auditoría con colores
 if [ -z "$l_output2" ]; then
-  echo -e "${GREEN}- Audit Result:\n *** PASS ***\n - Root's path is correctly configured${RESET}"
+  echo -e "${GREEN}[+] Ruta root correctamente configurado${RESET}"
   counter=$((counter + 1))
 else
-  echo -e "${PINK}- Audit Result:\n ** FAIL **\n - * Reasons for audit failure * :\n$l_output2${RESET}"
+  echo -e "${PINK}[-] Reasons for audit failure:\n$l_output2${RESET}"
 fi
 
 echo -e "\n"
