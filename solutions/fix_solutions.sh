@@ -41,17 +41,43 @@ declare -A nombres_legibles=(
 
 # ====== Funciones de solución ======
 mostrar_solucion() {
-    local tipo="$1" subtipo="$2"
+    local tipo="$1" subtipo="$2" contenido="${3:-}"
 
     echo
     echo -e "${YELLOW}Solución recomendada para $tipo → $subtipo:"
 
     case "$tipo:$subtipo" in
+        ("FILE_PERMISSION:Cron")
+            echo -e "1. Identificar el archivo con permisos incorrectos."
+            if [[ -n "$contenido" ]]; then
+                echo "$contenido" | grep "Cron:" | while read -r linea; do
+                    archivo=$(echo "$linea" | grep -oE '/etc/[^ ]+')
+                    [[ -z "$archivo" ]] && continue
+                    echo -e "   - $archivo"
+                done
+            fi
+            echo -e "\n2. Cambiar los permisos del archivo."
+            echo "$contenido" | grep "Cron:" | while read -r linea; do
+                archivo=$(echo "$linea" | grep -oE '/etc/[^ ]+')
+                [[ -z "$archivo" ]] && continue
+
+                case "$archivo" in
+                    (/etc/crontab)
+                        echo -e "   -> chmod 600 "$archivo""
+                        ;;
+                    (*)
+                        echo -e "   -> chmod 700 "$archivo""
+                        ;;
+                esac
+
+                echo -e "      chown root:root "$archivo""
+            done
+            ;;
         "SOFTWARE" | "SOFTWARE:")
             echo -e "1. Crea un archivo que contenga programas permitidos en tu sistema."
-            echo -e "  vim whitelist.txt"
-            echo -e "  ftp\n  rync\n  telnet\n"
-            echo -e "2. Ejecute el script:\n   -> sudo cis-audit --allowded-programs=whitelist.txt${RESET}"
+            echo -e "   -> vim whitelist.txt\n"
+            echo -e "2. Agregar programas a la lista\n   ftp\n   rync\n   telnet\n"
+            echo -e "3. Ejecute el script:\n   -> sudo cis-audit.sh --allowded-programs=whitelist.txt${RESET}"
             ;;
         "CONFIG:SUDO")
             sudo_log_file="/var/log/sudo.log"
@@ -65,13 +91,13 @@ mostrar_solucion() {
             ;;
     esac
 
-    echo
+    echo -e ${RESET}
 
     read -p "¿Desea aplicar la solución? (s/N): " resp
     if [[ "$resp" =~ ^[sSyY]$ ]]; then
-        echo -e "${GREEN}Aplicando solución...${RESET}"
+        echo -e "${GREEN}Aplicando solución...\n${RESET}"
         aplicar_solucion "$tipo" "$subtipo"
-        sleep 1
+        read -p "Presione Enter para continuar..."
     else
         echo -e "${BLUE}Volviendo al menú principal...${RESET}"
         sleep 1
@@ -81,6 +107,12 @@ mostrar_solucion() {
 aplicar_solucion() {
     local tipo="$1" subtipo="$2"
     case "$tipo:$subtipo" in
+        "SOFTWARE" | "SOFTWARE:")
+            echo "Creando archivo whitelist.txt..."
+            touch whitelist.txt
+            echo -e "Archivo whitelist.txt creado."
+            echo -e "Ahora ejecute:\n-> sudo cis-audit --allowded-programs=whitelist.txt\n"
+            ;;
         "CONFIG:SUDO")
             sudo_log_file="/var/log/sudo.log"
             if [[ ! -f "$sudo_log_file" ]]; then
@@ -132,8 +164,8 @@ while true; do
         subtipo="${subopciones[$subsel]}"
         [[ -z "$subtipo" ]] && continue
 
-        mostrar_solucion "$tipo_elegido" "$subtipo"
+        mostrar_solucion "$tipo_elegido" "$subtipo" "${grupos[$tipo_elegido]}"
     else
-        mostrar_solucion "$tipo_elegido" ""
+        mostrar_solucion "$tipo_elegido" "" "${grupos[$tipo_elegido]}"
     fi
 done
