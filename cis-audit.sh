@@ -1,29 +1,29 @@
 #!/usr/bin/bash
 
+echo "Sigue la estandarización de: cis_benchmark-ubuntu-server-24.04_TLS-v1.0.0"
+
+source "$(dirname "$0")/constantes/Colores.sh"
+source "$(dirname "$0")/functions/porcentaje_seguridad.sh"
+
 if [ "$(id -u)" -ne 0 ]; then
     echo "Permiso denegado $0" >&2
     exit 1
 fi
 
-LOG_DIR="$(dirname "$0")/logs"
-mkdir -p "$LOG_DIR"
-ERROR_LOG="$LOG_DIR/errors.log"
-: > "$ERROR_LOG"
-
-# Redirigir todos los errores de los scripts fuente a errors.log
-exec 2> >(tee -a "$ERROR_LOG" >&2)
-
 print_help() {
     cat <<'EOF'
-Usage: ./cis_benchmark-ubuntu-server-24.04_TLS-v1.0.0.sh [-h | --help] [--allowed-programs=<path>]
+Usage: ./cis-audit [-h | --help] [--allowed-programs=<path>]
 
 Opciones:
   -h, --help                Muestra esta ayuda.
+  --fix-configs             Corrige las malas configuraciones.
   --allowed-programs        Lee archivo de programas permitidos.
 EOF
 }
 
-PARSED=$(getopt -o h --long help,allowed-programs: -- "$@")
+FIX_CONFIGS=false
+
+PARSED=$(getopt -o h --long help,fix-configs,allowed-programs: -- "$@")
 if [ $? -ne 0 ]; then
     exit 2
 fi
@@ -33,6 +33,11 @@ while true; do
     case "$1" in
         (-h|--help)
             print_help
+            exit 0
+            ;;
+        (--fix-configs)
+            FIX_CONFIGS=true
+            source "$(dirname "$0")/solutions/fix_solutions.sh"
             exit 0
             ;;
         (--allowed-programs)
@@ -51,8 +56,13 @@ while true; do
     esac
 done
 
-source "$(dirname "$0")/constantes/Colores.sh"
-source "$(dirname "$0")/functions/porcentaje_seguridad.sh"
+LOG_DIR="$(dirname "$0")/logs"
+mkdir -p "$LOG_DIR"
+ERROR_LOG="$LOG_DIR/errors.log"
+: > "$ERROR_LOG"
+
+# Redirigir todos los errores de los scripts fuente a errors.log
+exec 2> >(tee -a "$ERROR_LOG" >&2)
 
 # Services - Configure Server and Clients Services
 source 1_config_server_clients_services.sh

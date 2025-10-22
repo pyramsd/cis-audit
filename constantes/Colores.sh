@@ -10,3 +10,4 @@ RESET="\033[0m"
 # Colores personalizados (256 colores)
 PINK="\033[38;5;210m"
 ORANGE="\033[38;5;208m"
+PURPLE="\033[1;35m"
