@@ -69,7 +69,28 @@ mostrar_solucion() {
                         echo -e "   -> chmod 700 "$archivo""
                         ;;
                 esac
+                echo -e "      chown root:root "$archivo""
+            done
+            ;;
+        ("FILE_PERMISSION:SSH")
+            echo -e "1. Identificar el archivo con permisos incorrectos."
+            if [[ -n "$contenido" ]]; then
+                echo "$contenido" | grep "SSH:" | while read -r linea; do
+                    archivo=$(echo "$linea" | grep -oE '/etc/ssh/[^ ]+')
+                    [[ -z "$archivo" ]] && continue
+                    echo -e "   - $archivo"
+                done
+            fi
+            echo -e "\n2. Cambiar los permisos del archivo."
+            echo "$contenido" | grep "SSH:" | while read -r linea; do
+                archivo=$(echo "$linea" | grep -oE '/etc/ssh/[^ ]+')
+                [[ -z "$archivo" ]] && continue
 
+                case "$archivo" in
+                    (*)
+                        echo -e "   -> chmod 600 "$archivo""
+                        ;;
+                esac
                 echo -e "      chown root:root "$archivo""
             done
             ;;
