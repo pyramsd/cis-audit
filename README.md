@@ -1,4 +1,4 @@
-# CIS Benchmark para Ubuntu Server 24.04 TLS v1.0.0
+# CIS Benchmark para Ubuntu Server
 
 Este proyecto proporciona un conjunto de scripts de shell para configurar un sistema Ubuntu Server de acuerdo con los Benchmarks de CIS (Center for Internet Security). Los scripts tienen como objetivo mejorar la postura de seguridad del servidor aplicando configuraciones recomendadas en varios componentes del sistema.
 
