@@ -94,20 +94,79 @@ mostrar_solucion() {
                 echo -e "      chown root:root "$archivo""
             done
             ;;
-        "SOFTWARE" | "SOFTWARE:")
+        ("SOFTWARE" | "SOFTWARE:")
             echo -e "1. Crea un archivo que contenga programas permitidos en tu sistema."
             echo -e "   -> vim whitelist.txt\n"
             echo -e "2. Agregar programas a la lista\n   ftp\n   rync\n   telnet\n"
             echo -e "3. Ejecute el script:\n   -> sudo cis-audit.sh --allowded-programs=whitelist.txt${RESET}"
             ;;
-        "CONFIG:SUDO")
+        ("CONFIG:SUDO")
             sudo_log_file="/var/log/sudo.log"
             if [[ ! -f "$sudo_log_file" ]]; then
                 echo -e "\n- Añadir el archivo: $sudo_log_file" >&2
                 echo -e "echo \"Defaults        logfile=\"/var/log/sudo.log\"\" >> /etc/sudoers${RESET}" 
             fi
             ;;
-        *)
+        ("CONFIG:SSH")
+            echo -e "1. Edite el fichero /etc/ssh/sshd_config"
+            echo -e "2. Asegurese de que los siguientes valores esten configurados:"
+
+            if [[ "$contenido" =~ "logingracetime" ]]; then
+                echo -e "   - LoginGraceTime 60"
+            fi
+            if [[ "$contenido" =~ "maxauthtries" ]]; then
+                echo -e "   - MaxAuthTries 4"
+            fi
+            if [[ "$contenido" =~ "PermitRootLogin" ]]; then
+                echo -e "   - PermitRootLogin no"
+            fi
+            if [[ "$contenido" =~ "disableforwarding" ]]; then
+                echo -e "   - DisableForwarding yes"
+            fi
+            if [[ "$contenido" =~ "gssapiauthentication" ]]; then
+                echo -e "   - GSSAPIAuthentication no"
+            fi
+            if [[ "$contenido" =~ "hostbasedauthentication" ]]; then
+                echo -e "   - HostbasedAuthentication no"
+            fi
+            if [[ "$contenido" =~ "ignorerhosts" ]]; then
+                echo -e "   - IgnoreRhosts yes"
+            fi
+            if [[ "$contenido" =~ "loglevel" ]]; then
+                echo -e "   - LogLevel INFO"
+            fi
+            if [[ "$contenido" =~ "permitemptypasswords" ]]; then
+                echo -e "   - PermitEmptyPasswords no"
+            fi
+            if [[ "$contenido" =~ "permituserenvironment" ]]; then
+                echo -e "   - PermitUserEnvironment no"
+            fi
+            if [[ "$contenido" =~ "maxstartups" ]]; then
+                echo -e "   - MaxStartups 10:30:60"
+            fi
+            if [[ "$contenido" =~ "clientaliveinterval" ]]; then
+                echo -e "   - ClientAliveInterval <valor numerico>"
+            fi
+            if [[ "$contenido" =~ "clientalivecountmax" ]]; then
+                echo -e "   - ClientAliveCountMax <valor numerico>"
+            fi
+            if [[ "$contenido" =~ "kexalgorithms" ]]; then
+                echo -e "   - KexAlgorithms <lista de algoritmos seguros>"
+            fi
+            if [[ "$contenido" =~ "macs" ]]; then
+                echo -e "   - MACs <lista de MACs seguros>"
+            fi
+            if [[ "$contenido" =~ "usepam" ]]; then
+                echo -e "   - UsePAM yes"
+            fi
+            if [[ "$contenido" =~ "accesos no configurados" ]]; then
+                echo -e "   - AllowUsers <lista de usuarios>"
+                echo -e "   - AllowGroups <lista de grupos>"
+                echo -e "   - DenyUsers <lista de usuarios>"
+                echo -e "   - DenyGroups <lista de grupos>"
+            fi
+            ;;
+        (*)
             echo -e "No hay una solución específica registrada para este subtipo."
             ;;
     esac

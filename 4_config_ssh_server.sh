@@ -65,7 +65,7 @@ output=$(sshd -T 2>&1 | grep -Pi -- '^ciphers\h+\"?([^#\n\r]+,)?((3des|blowfish|
 exit_code=$?
 if [ $exit_code -ne 0 ]; then
         echo -e "${PINK}[!] Cifrados no configurados${RESET}"
-        echo "[CONFIG] SSH: Cifrados no configurados" >> "$LOG_FILE"
+        echo "[CIPHERS] SSH: Cifrados no configurados" >> "$LOG_FILE"
 else
         echo -e "${GREEN}[+] Cifrados configurados:\n$output\e0m"
         counter=$((counter + 1))
