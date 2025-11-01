@@ -68,16 +68,15 @@ fi
 
 # Resultado de la auditoría
 if [ "${#a_output2[@]}" -le 0 ]; then
-    printf "${GREEN} ** PASS ** ${RESET}\n"
+    counter=$((counter + 1))
     for line in "${a_output[@]}"; do
         printf "${GREEN}%s\n${RESET}" "$line"
-        counter=$((counter + 1))
     done
 else
-    printf "${RED} ** FAIL ** ${RESET}\n"
     printf " * Reasons for audit failure *\n"
     for line in "${a_output2[@]}"; do
         printf "${RED}%s\n${RESET}" "$line"
+        echo "[MTA_CONFIG] ${line}" >> "$LOG_FILE"
     done
     printf "\n"
     if [ "${#a_output[@]}" -gt 0 ]; then
